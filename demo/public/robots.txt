@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lianyongli.github.io/scribeva-editor/sitemap.xml

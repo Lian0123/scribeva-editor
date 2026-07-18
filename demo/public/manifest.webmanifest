@@ -1,0 +1,10 @@
+{
+  "name": "Scribeva Editor",
+  "short_name": "Scribeva",
+  "description": "Portable writing infrastructure for enterprise web products.",
+  "start_url": "../",
+  "display": "standalone",
+  "background_color": "#f1efe6",
+  "theme_color": "#0b3d2e",
+  "lang": "zh-Hant"
+}

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-Hant" data-initial-locale="zh-TW">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b3d2e">
+    <meta name="color-scheme" content="light">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta name="author" content="Scribeva Editor contributors">
+    <meta name="application-name" content="Scribeva Editor">
+    <meta
+      name="keywords"
+      content="HTML editor, rich text editor, WYSIWYG, TypeScript editor, MIT editor, framework independent editor"
+    >
+    <meta
+      name="description"
+      content="Scribeva Editor 是零執行期相依、MIT 授權的企業級 HTML 編輯器，提供專業 Ribbon 介面、安全內容管線與可攜式 HTML。"
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Scribeva Editor">
+    <meta property="og:locale" content="zh_TW">
+    <meta property="og:title" content="Scribeva Editor｜可攜式專業 HTML 編輯器">
+    <meta
+      property="og:description"
+      content="零執行期相依、MIT 授權，為企業產品打造的可攜式寫作基礎設施。"
+    >
+    <meta
+      property="og:image"
+      content="https://lianyongli.github.io/scribeva-editor/og-scribeva.png"
+    >
+    <meta property="og:image:width" content="1536">
+    <meta property="og:image:height" content="896">
+    <meta property="og:image:alt" content="Scribeva Editor — Portable writing infrastructure.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Scribeva Editor｜可攜式專業 HTML 編輯器">
+    <meta
+      name="twitter:description"
+      content="零執行期相依、MIT 授權，為企業產品打造的可攜式寫作基礎設施。"
+    >
+    <meta
+      name="twitter:image"
+      content="https://lianyongli.github.io/scribeva-editor/og-scribeva.png"
+    >
+    <link rel="canonical" href="https://lianyongli.github.io/scribeva-editor/">
+    <link rel="alternate" hreflang="zh-Hant" href="https://lianyongli.github.io/scribeva-editor/?lang=zh-TW">
+    <link rel="alternate" hreflang="en" href="https://lianyongli.github.io/scribeva-editor/?lang=en">
+    <link rel="alternate" hreflang="ja" href="https://lianyongli.github.io/scribeva-editor/?lang=ja">
+    <link rel="alternate" hreflang="x-default" href="https://lianyongli.github.io/scribeva-editor/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%230b3d2e%22/><text x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-size=%2236%22 fill=%22%23f2efe4%22>S</text></svg>">
+    <link rel="stylesheet" href="./assets/site.css">
+    <title>Scribeva Editor｜可攜式專業 HTML 編輯器</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Scribeva Editor",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "description": "A framework-independent, MIT-licensed enterprise HTML editor with zero runtime dependencies.",
+        "softwareVersion": "0.0.1",
+        "license": "https://opensource.org/license/mit",
+        "url": "https://lianyongli.github.io/scribeva-editor/",
+        "downloadUrl": "https://www.npmjs.com/package/scribeva-editor",
+        "programmingLanguage": "TypeScript",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <button class="demo-skip-link" type="button" data-scroll="editor" data-i18n="skipToEditor">跳至編輯器</button>
+
+    <header class="demo-header">
+      <button class="demo-brand" type="button" data-scroll="top" aria-label="Scribeva home">
+        <span class="demo-brand-mark">S</span>
+        <span>
+          <strong>Scribeva</strong>
+          <small>EDITOR</small>
+        </span>
+      </button>
+      <nav class="demo-links" aria-label="Website navigation">
+        <button type="button" data-scroll="playground" data-i18n="navPlayground">線上體驗</button>
+        <button type="button" data-scroll="features" data-i18n="navFeatures">產品特色</button>
+        <button type="button" data-scroll="install" data-i18n="navInstall">安裝</button>
+      </nav>
+      <div class="demo-actions" aria-label="Demo actions">
+        <label class="demo-language">
+          <span class="demo-visually-hidden" data-i18n="languageLabel">語言</span>
+          <select id="site-locale" aria-label="Language">
+            <option value="zh-TW">繁體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+          </select>
+        </label>
+        <button id="readonly-toggle" type="button" data-i18n="readOnly">唯讀模式</button>
+        <button id="copy-html" type="button" data-i18n="copyHTML">複製 HTML</button>
+        <button id="copy-json" type="button" data-i18n="copyJSON">複製 JSON</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="demo-hero" aria-labelledby="hero-title">
+        <aside class="demo-hero-rail" data-reveal>
+          <span>FIELD NOTE</span>
+          <strong>01 / 04</strong>
+          <i aria-hidden="true"></i>
+          <p data-i18n="heroRail">為產品團隊建立的內容基礎設施</p>
+        </aside>
+
+        <div class="demo-hero-copy">
+          <p class="eyebrow" data-i18n="eyebrow" data-reveal>MIT 授權 · 零執行期相依</p>
+          <h1 id="hero-title" data-reveal>
+            <span data-i18n="headlineLead">讓內容保持</span>
+            <em data-i18n="headlineAccent">可攜、清楚、由你掌控。</em>
+          </h1>
+          <p class="demo-intro-copy" data-i18n="intro" data-reveal>
+            Scribeva 是為企業產品打造的專業 HTML 編輯器：熟悉的寫作介面、可預測的輸出，以及不綁定框架的整合方式。
+          </p>
+          <div class="demo-hero-actions" data-reveal>
+            <button type="button" class="demo-primary" data-scroll="playground" data-i18n="tryEditor">立即體驗</button>
+            <button type="button" class="demo-secondary" data-scroll="install" data-i18n="viewInstall">查看安裝方式</button>
+          </div>
+          <dl class="demo-proof" data-reveal>
+            <div><dt>0</dt><dd data-i18n="metricRuntime">執行期相依</dd></div>
+            <div><dt>3</dt><dd data-i18n="metricLanguages">內建語言</dd></div>
+            <div><dt>MIT</dt><dd data-i18n="metricLicense">商用授權</dd></div>
+          </dl>
+        </div>
+
+        <div class="demo-hero-visual" aria-hidden="true" data-reveal>
+          <div class="demo-blueprint-label">DOCUMENT / 01</div>
+          <div class="demo-document-sheet">
+            <span class="demo-sheet-kicker"></span>
+            <span class="demo-sheet-title"></span>
+            <span class="demo-sheet-title demo-sheet-title--short"></span>
+            <div class="demo-sheet-grid">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="demo-visual-caption">PORTABLE HTML<br>STRUCTURED JSON</div>
+        </div>
+      </section>
+
+      <section id="playground" class="demo-playground">
+        <div class="demo-section-heading">
+          <div>
+            <span>02</span>
+            <p data-i18n="playgroundEyebrow">即時線上體驗</p>
+          </div>
+          <h2 data-i18n="playgroundTitle">直接在瀏覽器撰寫、排版與匯出。</h2>
+          <p data-i18n="playgroundBody">每次切換語言，官網與範例文件都會同步更新。</p>
+        </div>
+        <div class="demo-editor-frame">
+          <div class="demo-editor-meta">
+            <span data-i18n="editorMeta">可編輯範例文件</span>
+            <span>HTML / JSON / BLOB</span>
+          </div>
+          <div id="editor"></div>
+        </div>
+      </section>
+
+      <section class="demo-features" id="features" data-scroll-reveal>
+        <header>
+          <span>03</span>
+          <p data-i18n="featureEyebrow">產品原則</p>
+          <h2 data-i18n="featureTitle">編輯體驗應該精緻，內容格式仍應保持開放。</h2>
+        </header>
+        <div class="demo-details">
+          <article>
+            <span>01</span>
+            <h3 data-i18n="feature1Title">可攜式設計</h3>
+            <p data-i18n="feature1Body">只安裝一個 npm 套件，即可整合至現代化 Web 技術棧。</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3 data-i18n="feature2Title">安全內容管線</h3>
+            <p data-i18n="feature2Body">HTML allowlist、貼上正規化與可預測的序列化輸出。</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3 data-i18n="feature3Title">企業級介面</h3>
+            <p data-i18n="feature3Body">Ribbon、主題、鍵盤工作流與完整響應式設計。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="demo-install" id="install" data-scroll-reveal>
+        <div class="demo-install-index">04</div>
+        <div>
+          <p class="eyebrow" data-i18n="installEyebrow">單一套件，不綁框架</p>
+          <h2 data-i18n="installTitle">幾分鐘內加入完整編輯器。</h2>
+          <p data-i18n="installBody">包含 ESM、CommonJS、TypeScript 型別、CSS、語系與選用的 Custom Element。</p>
+        </div>
+        <pre><code>npm install scribeva-editor</code><button id="copy-install" type="button" data-i18n="copyCommand">複製</button></pre>
+      </section>
+
+      <section class="demo-security" data-scroll-reveal>
+        <span data-i18n="securityEyebrow">SECURITY BY DESIGN</span>
+        <h2 data-i18n="securityTitle">不依賴專有雲端的可攜內容。</h2>
+        <p data-i18n="securityBody">安全 HTML、受控 URL、Blob 圖片與完整 CSP 部署指南。</p>
+      </section>
+    </main>
+
+    <footer class="demo-footer">
+      <div class="demo-brand demo-brand--footer">
+        <span class="demo-brand-mark">S</span>
+        <span><strong>Scribeva</strong><small>EDITOR</small></span>
+      </div>
+      <p data-i18n="footer">MIT 授權，為重視資料所有權與控制權的產品打造。</p>
+      <a href="https://github.com/Lian0123/scribeva-editor" rel="noreferrer">GitHub ↗</a>
+    </footer>
+
+    <div class="demo-toast" id="toast" role="status" aria-live="polite"></div>
+    <script defer src="./assets/site.js"></script>
+  </body>
+</html>

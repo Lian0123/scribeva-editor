@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "paths": {
+      "@scribeva/*": ["./src/*"],
+      "scribeva-editor": ["./src/public-api.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "demo",
+    "tests",
+    "vite.config.ts",
+    "vite.demo.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
+}

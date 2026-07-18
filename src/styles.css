@@ -1,0 +1,1034 @@
+@layer scribeva {
+  .scribeva {
+    --scribeva-accent: #5b5bd6;
+    --scribeva-accent-strong: #4747c4;
+    --scribeva-accent-soft: #eeeeff;
+    --scribeva-bg: #eef1f6;
+    --scribeva-surface: #ffffff;
+    --scribeva-surface-raised: #ffffff;
+    --scribeva-surface-muted: #f7f8fa;
+    --scribeva-border: #d9dee7;
+    --scribeva-border-strong: #c5ccd8;
+    --scribeva-text: #172033;
+    --scribeva-text-muted: #697386;
+    --scribeva-text-subtle: #929bad;
+    --scribeva-focus: #7777e7;
+    --scribeva-canvas-width: 816px;
+    --scribeva-radius: 10px;
+    --scribeva-control-radius: 6px;
+    --scribeva-shadow: 0 18px 45px rgb(27 39 65 / 12%),
+      0 2px 8px rgb(27 39 65 / 7%);
+    --scribeva-zoom: 1;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto minmax(420px, 1fr) auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 720px;
+    overflow: hidden;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 14px;
+    background: var(--scribeva-bg);
+    color: var(--scribeva-text);
+    font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans", sans-serif;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+    color-scheme: light;
+  }
+
+  .scribeva[data-theme="dark"] {
+    --scribeva-accent: #8e8ef0;
+    --scribeva-accent-strong: #a4a4f5;
+    --scribeva-accent-soft: #29294e;
+    --scribeva-bg: #121722;
+    --scribeva-surface: #1b2230;
+    --scribeva-surface-raised: #222b3a;
+    --scribeva-surface-muted: #181f2b;
+    --scribeva-border: #303a4b;
+    --scribeva-border-strong: #435066;
+    --scribeva-text: #f1f4f9;
+    --scribeva-text-muted: #aab4c5;
+    --scribeva-text-subtle: #7f899b;
+    --scribeva-focus: #9d9df4;
+    --scribeva-shadow: 0 20px 50px rgb(0 0 0 / 35%);
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .scribeva[data-theme="system"] {
+      --scribeva-accent: #8e8ef0;
+      --scribeva-accent-strong: #a4a4f5;
+      --scribeva-accent-soft: #29294e;
+      --scribeva-bg: #121722;
+      --scribeva-surface: #1b2230;
+      --scribeva-surface-raised: #222b3a;
+      --scribeva-surface-muted: #181f2b;
+      --scribeva-border: #303a4b;
+      --scribeva-border-strong: #435066;
+      --scribeva-text: #f1f4f9;
+      --scribeva-text-muted: #aab4c5;
+      --scribeva-text-subtle: #7f899b;
+      --scribeva-focus: #9d9df4;
+      --scribeva-shadow: 0 20px 50px rgb(0 0 0 / 35%);
+      color-scheme: dark;
+    }
+  }
+
+  .scribeva *,
+  .scribeva *::before,
+  .scribeva *::after {
+    box-sizing: border-box;
+  }
+
+  .scribeva button,
+  .scribeva input,
+  .scribeva select,
+  .scribeva textarea {
+    font: inherit;
+  }
+
+  .scribeva button,
+  .scribeva select,
+  .scribeva input[type="color"],
+  .scribeva input[type="range"] {
+    cursor: pointer;
+  }
+
+  .scribeva button:focus-visible,
+  .scribeva input:focus-visible,
+  .scribeva select:focus-visible,
+  .scribeva textarea:focus-visible,
+  .scribeva [contenteditable]:focus-visible {
+    outline: 2px solid var(--scribeva-focus);
+    outline-offset: 2px;
+  }
+
+  .scribeva__titlebar {
+    display: grid;
+    grid-template-columns: 1fr minmax(180px, 340px) 1fr;
+    align-items: center;
+    min-height: 58px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface);
+  }
+
+  .scribeva__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+  }
+
+  .scribeva__brand-mark {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 9px;
+    background: linear-gradient(145deg, #7777e7, #4444b8);
+    color: #fff;
+    font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;
+    font-size: 19px;
+    font-weight: 700;
+    box-shadow: inset 0 1px rgb(255 255 255 / 22%);
+  }
+
+  .scribeva__brand > span:last-child {
+    display: grid;
+    line-height: 1.15;
+  }
+
+  .scribeva__brand strong {
+    letter-spacing: -0.01em;
+  }
+
+  .scribeva__brand small {
+    margin-top: 3px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+  }
+
+  .scribeva__document-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .scribeva__document-name input {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--scribeva-control-radius);
+    background: transparent;
+    color: var(--scribeva-text);
+    padding: 6px 9px;
+    text-align: center;
+  }
+
+  .scribeva__document-name input:hover {
+    border-color: var(--scribeva-border);
+    background: var(--scribeva-surface-muted);
+  }
+
+  .scribeva__save-state {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #21a179;
+    box-shadow: 0 0 0 3px rgb(33 161 121 / 12%);
+  }
+
+  .scribeva__title-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .scribeva__license {
+    color: var(--scribeva-text-muted);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+
+  .scribeva__icon-button {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 8px;
+    background: var(--scribeva-surface-muted);
+    color: var(--scribeva-text);
+  }
+
+  .scribeva svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .scribeva__tabs {
+    display: flex;
+    gap: 4px;
+    min-height: 37px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface);
+  }
+
+  .scribeva__tabs button {
+    position: relative;
+    min-width: 74px;
+    border: 0;
+    background: transparent;
+    color: var(--scribeva-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .scribeva__tabs button[aria-selected="true"] {
+    color: var(--scribeva-accent-strong);
+  }
+
+  .scribeva__tabs button[aria-selected="true"]::after {
+    position: absolute;
+    right: 12px;
+    bottom: -1px;
+    left: 12px;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: var(--scribeva-accent);
+    content: "";
+  }
+
+  .scribeva__ribbon {
+    display: flex;
+    min-height: 112px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface);
+    scrollbar-width: thin;
+  }
+
+  .scribeva__ribbon[hidden] {
+    display: none;
+  }
+
+  .scribeva__group {
+    display: grid;
+    align-content: space-between;
+    min-width: max-content;
+    padding: 9px 11px 5px;
+    border-right: 1px solid var(--scribeva-border);
+  }
+
+  .scribeva__group h3 {
+    margin: 5px 0 0;
+    color: var(--scribeva-text-subtle);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .scribeva__tool-row,
+  .scribeva__control-row,
+  .scribeva__large-tools {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .scribeva__control-row + .scribeva__control-row {
+    margin-top: 5px;
+  }
+
+  .scribeva__tool,
+  .scribeva__color {
+    display: inline-grid;
+    min-width: 32px;
+    height: 31px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: var(--scribeva-control-radius);
+    background: transparent;
+    color: var(--scribeva-text);
+  }
+
+  .scribeva__tool small {
+    display: none;
+  }
+
+  .scribeva__tool:hover,
+  .scribeva__color:hover,
+  .scribeva__tool.is-active {
+    border-color: var(--scribeva-border);
+    background: var(--scribeva-accent-soft);
+    color: var(--scribeva-accent-strong);
+  }
+
+  .scribeva__tool:disabled {
+    opacity: 0.36;
+    pointer-events: none;
+  }
+
+  .scribeva__tool-text {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  [data-command="italic"] .scribeva__tool-text {
+    font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;
+    font-style: italic;
+  }
+
+  [data-command="underline"] .scribeva__tool-text {
+    text-decoration: underline;
+  }
+
+  [data-command="strike"] .scribeva__tool-text {
+    text-decoration: line-through;
+  }
+
+  .scribeva__control-row select {
+    height: 31px;
+    min-width: 72px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface-muted);
+    color: var(--scribeva-text);
+    padding: 0 26px 0 8px;
+    font-size: 11px;
+  }
+
+  .scribeva__group--text .scribeva__control-row:first-child select:first-child {
+    width: 150px;
+  }
+
+  .scribeva__group--paragraph .scribeva__control-row:first-child select {
+    width: 128px;
+  }
+
+  .scribeva__color {
+    position: relative;
+    font-weight: 700;
+    overflow: hidden;
+  }
+
+  .scribeva__color::after {
+    position: absolute;
+    right: 6px;
+    bottom: 3px;
+    left: 6px;
+    height: 3px;
+    border-radius: 2px;
+    background: #1d2939;
+    content: "";
+  }
+
+  .scribeva__color--highlight::after {
+    background: #ffd84d;
+  }
+
+  .scribeva__color input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .scribeva__large-tools {
+    gap: 7px;
+  }
+
+  .scribeva__large-tools .scribeva__tool {
+    width: 68px;
+    height: 68px;
+    gap: 5px;
+  }
+
+  .scribeva__large-tools .scribeva__tool svg {
+    width: 25px;
+    height: 25px;
+  }
+
+  .scribeva__large-tools .scribeva__tool small {
+    display: block;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .scribeva__theme-select {
+    display: grid;
+    gap: 5px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+  }
+
+  .scribeva__theme-select select {
+    height: 34px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface-muted);
+    color: var(--scribeva-text);
+    padding: 0 28px 0 9px;
+  }
+
+  .scribeva__workspace {
+    min-height: 0;
+    overflow: auto;
+    padding: 38px 28px 60px;
+    background-color: var(--scribeva-bg);
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--scribeva-border) 60%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 24px 24px;
+  }
+
+  .scribeva.is-source-mode .scribeva__workspace {
+    padding: 22px;
+    background: #101713;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 2%) 1px, transparent 1px);
+    background-size: 100% 24px;
+  }
+
+  .scribeva__ribbon--source {
+    min-height: 112px;
+  }
+
+  .scribeva__group--source {
+    grid-template-columns: auto minmax(280px, 1fr);
+    column-gap: 22px;
+    width: 100%;
+  }
+
+  .scribeva__group--source h3 {
+    grid-column: 1 / -1;
+  }
+
+  .scribeva__source-help {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    min-width: 260px;
+  }
+
+  .scribeva__source-help strong {
+    color: var(--scribeva-text);
+    font: 650 12px/1.4 "Noto Sans Mono", monospace;
+  }
+
+  .scribeva__source-help span,
+  .scribeva__source-help output {
+    color: var(--scribeva-text-muted);
+    font: 10px/1.5 "Noto Sans Mono", monospace;
+  }
+
+  .scribeva__source-workspace {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    width: min(1180px, 100%);
+    height: 100%;
+    min-height: 620px;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid #314139;
+    border-radius: 5px;
+    background: #111a15;
+    box-shadow: 0 20px 55px rgb(0 0 0 / 24%);
+  }
+
+  .scribeva__source-workspace[hidden] {
+    display: none;
+  }
+
+  .scribeva__source-gutter {
+    min-width: 54px;
+    overflow: hidden;
+    padding: 18px 13px;
+    border-right: 1px solid #314139;
+    background: #0c120f;
+    color: #718278;
+    font: 13px/1.65 "Noto Sans Mono", monospace;
+    text-align: right;
+    white-space: pre;
+    user-select: none;
+  }
+
+  .scribeva__source {
+    width: 100%;
+    min-height: 620px;
+    resize: none;
+    overflow: auto;
+    padding: 18px 20px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #d9e5dc;
+    caret-color: #b7d36b;
+    font: 13px/1.65 "Noto Sans Mono", monospace;
+    tab-size: 2;
+    white-space: pre;
+  }
+
+  .scribeva.is-source-wrapped .scribeva__source {
+    white-space: pre-wrap;
+  }
+
+  .scribeva__page-wrap {
+    width: calc(var(--scribeva-canvas-width) * var(--scribeva-zoom));
+    min-height: calc(1056px * var(--scribeva-zoom));
+    margin: 0 auto;
+  }
+
+  .scribeva__page {
+    width: var(--scribeva-canvas-width);
+    min-height: 1056px !important;
+    padding: 78px 82px;
+    transform: scale(var(--scribeva-zoom));
+    transform-origin: top left;
+    border: 1px solid color-mix(in srgb, var(--scribeva-border) 75%, transparent);
+    border-radius: 2px;
+    background: var(--scribeva-surface-raised);
+    color: var(--scribeva-text);
+    box-shadow: var(--scribeva-shadow);
+    font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;
+    font-size: 16px;
+    line-height: 1.65;
+    caret-color: var(--scribeva-accent);
+  }
+
+  .scribeva__page:empty::before {
+    color: var(--scribeva-text-subtle);
+    content: attr(data-placeholder);
+    pointer-events: none;
+  }
+
+  .scribeva__page:focus {
+    outline: 1px solid color-mix(in srgb, var(--scribeva-accent) 38%, transparent);
+  }
+
+  .scribeva__page h1,
+  .scribeva__page h2,
+  .scribeva__page h3 {
+    color: var(--scribeva-text);
+    font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans", sans-serif;
+    line-height: 1.18;
+  }
+
+  .scribeva__page h1 {
+    margin: 0 0 0.75em;
+    font-size: 2.35em;
+    letter-spacing: -0.035em;
+  }
+
+  .scribeva__page h2 {
+    margin: 1.5em 0 0.55em;
+    font-size: 1.65em;
+    letter-spacing: -0.02em;
+  }
+
+  .scribeva__page h3 {
+    margin: 1.35em 0 0.5em;
+    font-size: 1.25em;
+  }
+
+  .scribeva__page p {
+    margin: 0 0 0.9em;
+  }
+
+  .scribeva__page blockquote {
+    margin: 1.2em 0;
+    padding: 0.6em 1.1em;
+    border-left: 3px solid var(--scribeva-accent);
+    background: var(--scribeva-accent-soft);
+    color: var(--scribeva-text-muted);
+  }
+
+  .scribeva__page pre {
+    overflow-x: auto;
+    padding: 16px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 8px;
+    background: var(--scribeva-surface-muted);
+    font: 13px/1.6 "Noto Sans Mono", monospace;
+  }
+
+  .scribeva__page a {
+    color: var(--scribeva-accent-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .scribeva__page img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .scribeva__page table {
+    width: 100%;
+    margin: 1.2em 0;
+    overflow: hidden;
+    border: 1px solid var(--scribeva-border-strong);
+    border-collapse: collapse;
+    border-radius: 4px;
+  }
+
+  .scribeva__page td,
+  .scribeva__page th {
+    min-width: 56px;
+    padding: 8px 10px;
+    border: 1px solid var(--scribeva-border-strong);
+    vertical-align: top;
+  }
+
+  .scribeva__page th {
+    background: color-mix(
+      in srgb,
+      var(--scribeva-accent-soft) 56%,
+      var(--scribeva-surface-muted)
+    );
+    font-weight: 650;
+  }
+
+  .scribeva__page td:focus,
+  .scribeva__page th:focus {
+    outline: 2px solid var(--scribeva-focus);
+    outline-offset: -2px;
+  }
+
+  .scribeva__table-style-row {
+    margin-top: 5px;
+  }
+
+  .scribeva__table-color {
+    position: relative;
+    display: grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface-muted);
+    color: var(--scribeva-text);
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .scribeva__table-color::after {
+    position: absolute;
+    right: 4px;
+    bottom: 3px;
+    left: 4px;
+    height: 3px;
+    border-radius: 2px;
+    background: #315f4c;
+    content: "";
+  }
+
+  .scribeva__table-color--fill::after {
+    background: #e4eee8;
+  }
+
+  .scribeva__table-color input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .scribeva__page hr {
+    margin: 2em 0;
+    border: 0;
+    border-top: 1px solid var(--scribeva-border-strong);
+  }
+
+  .scribeva__page ::selection {
+    background: color-mix(in srgb, var(--scribeva-accent) 25%, transparent);
+  }
+
+  .scribeva__statusbar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 34px;
+    padding: 0 14px;
+    border-top: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface);
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+    letter-spacing: 0.015em;
+  }
+
+  .scribeva__status-ready {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .scribeva__status-ready i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #21a179;
+  }
+
+  .scribeva__status-spacer {
+    flex: 1;
+  }
+
+  .scribeva__statusbar label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scribeva__statusbar input[type="range"] {
+    width: 92px;
+    accent-color: var(--scribeva-accent);
+  }
+
+  .scribeva__statusbar output {
+    min-width: 34px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scribeva__dialog {
+    width: min(480px, calc(100vw - 32px));
+    padding: 0;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 14px;
+    background: var(--scribeva-surface-raised);
+    color: var(--scribeva-text);
+    box-shadow: 0 24px 70px rgb(16 24 40 / 25%);
+  }
+
+  .scribeva__dialog::backdrop {
+    background: rgb(15 23 42 / 48%);
+    backdrop-filter: blur(3px);
+  }
+
+  .scribeva__dialog header {
+    display: grid;
+    grid-template-columns: 42px 1fr 30px;
+    gap: 12px;
+    align-items: center;
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--scribeva-border);
+  }
+
+  .scribeva__dialog-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--scribeva-accent-soft);
+    color: var(--scribeva-accent-strong);
+  }
+
+  .scribeva__dialog h2,
+  .scribeva__dialog p {
+    margin: 0;
+  }
+
+  .scribeva__dialog h2 {
+    font-size: 16px;
+  }
+
+  .scribeva__dialog p {
+    margin-top: 3px;
+    color: var(--scribeva-text-muted);
+    font-size: 11px;
+  }
+
+  .scribeva__dialog-close {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--scribeva-text-muted);
+    font-size: 22px;
+  }
+
+  .scribeva__dialog-fields {
+    display: grid;
+    gap: 14px;
+    padding: 20px 22px;
+  }
+
+  .scribeva__dialog-fields label {
+    display: grid;
+    gap: 6px;
+    color: var(--scribeva-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .scribeva__dialog-fields input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 8px;
+    background: var(--scribeva-surface-muted);
+    color: var(--scribeva-text);
+    padding: 0 11px;
+    font-weight: 400;
+  }
+
+  .scribeva__dialog-fields .scribeva__check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scribeva__dialog-fields .scribeva__check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--scribeva-accent);
+  }
+
+  .scribeva__field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .scribeva__dialog footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 22px;
+    border-top: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface-muted);
+  }
+
+  .scribeva__dialog.is-preview {
+    width: min(920px, calc(100vw - 32px));
+  }
+
+  .scribeva__dialog.is-preview footer {
+    display: none;
+  }
+
+  .scribeva__emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 7px;
+  }
+
+  .scribeva__emoji-grid button {
+    display: grid;
+    min-width: 0;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 8px;
+    background: var(--scribeva-surface-muted);
+    font-size: 22px;
+  }
+
+  .scribeva__emoji-grid button:hover {
+    border-color: var(--scribeva-accent);
+    background: var(--scribeva-accent-soft);
+  }
+
+  .scribeva__preview {
+    min-height: 460px;
+    padding: 54px 64px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: 3px;
+    background: var(--scribeva-surface-raised);
+    box-shadow: 0 12px 30px rgb(16 24 40 / 10%);
+    font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;
+    line-height: 1.65;
+  }
+
+  .scribeva__preview img {
+    max-width: 100%;
+  }
+
+  .scribeva__preview table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .scribeva__preview td,
+  .scribeva__preview th {
+    padding: 8px;
+    border: 1px solid var(--scribeva-border-strong);
+  }
+
+  .scribeva__button {
+    height: 36px;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .scribeva__button--secondary {
+    border: 1px solid var(--scribeva-border);
+    background: var(--scribeva-surface);
+    color: var(--scribeva-text);
+  }
+
+  .scribeva__button--primary {
+    border: 1px solid var(--scribeva-accent-strong);
+    background: var(--scribeva-accent);
+    color: #fff;
+  }
+
+  .scribeva.is-readonly .scribeva__ribbon {
+    opacity: 0.62;
+    pointer-events: none;
+  }
+
+  .scribeva.is-focus-mode {
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .scribeva.is-focus-mode .scribeva__titlebar,
+  .scribeva.is-focus-mode .scribeva__tabs,
+  .scribeva.is-focus-mode .scribeva__ribbon {
+    display: none;
+  }
+
+  @media (max-width: 840px) {
+    .scribeva {
+      border-radius: 10px;
+    }
+
+    .scribeva__titlebar {
+      grid-template-columns: 1fr auto;
+    }
+
+    .scribeva__document-name {
+      display: none;
+    }
+
+    .scribeva__license {
+      display: none;
+    }
+
+    .scribeva__workspace {
+      padding: 20px 12px 40px;
+    }
+
+    .scribeva__page-wrap {
+      width: 100%;
+      min-height: 720px;
+    }
+
+    .scribeva__page {
+      width: 100%;
+      min-height: 720px !important;
+      padding: 52px 8vw;
+      transform: none;
+    }
+
+    .scribeva__statusbar > span:nth-child(2) {
+      overflow: hidden;
+      max-width: 45vw;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .scribeva__tool,
+    .scribeva__tabs button,
+    .scribeva__icon-button {
+      transition:
+        background 120ms ease,
+        color 120ms ease,
+        border-color 120ms ease;
+    }
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    .scribeva__page,
+    .scribeva__page * {
+      visibility: visible;
+    }
+
+    .scribeva__page {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      min-height: 0 !important;
+      padding: 0;
+      transform: none;
+      border: 0;
+      box-shadow: none;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+    "schema_version": 2,
+    "commit": "b6d04e3054c23622a98e92e0353c8dd083356a94",
+    "indexed_at": "2026-07-18T12:57:44Z",
+    "project": "scribeva-editor",
+    "nodes": 625,
+    "edges": 1404,
+    "original_size": 2228224,
+    "compressed_size": 163882,
+    "compression_level": 3
+}
