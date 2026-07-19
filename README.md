@@ -1,6 +1,6 @@
 # Scribeva Editor
 
-[繁體中文](https://github.com/Lian0123/scribeva-editor/README.zh-TW.md) · **English** · [日本語](https://github.com/Lian0123/scribeva-editor/README.ja.md)
+[繁體中文](https://github.com/Lian0123/scribeva-editor/blob/main/README.zh-TW.md) · **English** · [日本語](https://github.com/Lian0123/scribeva-editor/blob/main/README.ja.md)
 
 Scribeva is a framework-independent, MIT-licensed HTML editor with a polished
 Word-inspired interface. It ships as one npm package and currently has zero
@@ -87,7 +87,7 @@ defineScribevaElement();
 
 Scribeva sanitizes imported and pasted HTML in the browser. Applications must
 still enforce authorization and sanitize untrusted HTML on the server before
-storage or rendering. See [SECURITY.md](https://github.com/Lian0123/scribeva-editor/SECURITY.md).
+storage or rendering. See [SECURITY.md](https://github.com/Lian0123/scribeva-editor/blob/main/SECURITY.md).
 
 ### Content Security Policy
 
@@ -159,7 +159,7 @@ use GitHub Actions.
 After building, `demo/index.html` can be opened directly with `file://` without
 a server, ES-module CORS, or TypeScript loading. The website uses GSAP as a
 build-time-only animation dependency; it is not part of the npm package. See
-[THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/THIRD_PARTY_NOTICES.md).
+[THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/blob/main/THIRD_PARTY_NOTICES.md).
 
 ## Development
 
@@ -173,7 +173,7 @@ npm run test:e2e
 ```
 
 The AI-oriented living documentation starts at
-[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/docs/ai-maintenance/entry.md).
+[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/blob/main/docs/ai-maintenance/entry.md).
 
 ## Current status
 
@@ -184,4 +184,4 @@ and real-time collaboration remain future work.
 
 ## License
 
-[MIT](https://github.com/Lian0123/scribeva-editor/LICENSE)
+[MIT](https://github.com/Lian0123/scribeva-editor/blob/main/LICENSE)

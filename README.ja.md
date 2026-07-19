@@ -1,6 +1,6 @@
 # Scribeva Editor
 
-[繁體中文](https://github.com/Lian0123/scribeva-editor/README.zh-TW.md) · [English](https://github.com/Lian0123/scribeva-editor/README.md) · **日本語**
+[繁體中文](https://github.com/Lian0123/scribeva-editor/blob/main/README.zh-TW.md) · [English](https://github.com/Lian0123/scribeva-editor/blob/main/README.md) · **日本語**
 
 Scribeva は、フレームワークに依存しない MIT ライセンスのエンタープライズ
 HTML エディターです。Word 風のリボン UI を提供し、実行時依存はゼロです。
@@ -95,7 +95,7 @@ npm run preview:site
 ビルド後は `demo/index.html` を `file://` で直接開くことができ、TypeScript
 読み込みや ES module CORS は発生しません。GSAP は公式サイト専用のビルド時
 依存で、npm パッケージには含まれません。詳細は
-[THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/THIRD_PARTY_NOTICES.md) を参照してください。
+[THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/blob/main/THIRD_PARTY_NOTICES.md) を参照してください。
 
 ## 開発と検証
 
@@ -108,8 +108,8 @@ npm run test:e2e
 ```
 
 AI メンテナンス入口：
-[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/docs/ai-maintenance/entry.md)
+[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/blob/main/docs/ai-maintenance/entry.md)
 
 ## ライセンス
 
-[MIT](https://github.com/Lian0123/scribeva-editor/LICENSE)
+[MIT](https://github.com/Lian0123/scribeva-editor/blob/main/LICENSE)

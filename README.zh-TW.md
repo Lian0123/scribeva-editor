@@ -1,6 +1,6 @@
 # Scribeva Editor
 
-**繁體中文** · [English](https://github.com/Lian0123/scribeva-editor/README.md) · [日本語](https://github.com/Lian0123/scribeva-editor/README.ja.md)
+**繁體中文** · [English](https://github.com/Lian0123/scribeva-editor/blob/main/README.md) · [日本語](https://github.com/Lian0123/scribeva-editor/blob/main/README.ja.md)
 
 Scribeva 是 framework-independent、MIT 授權的企業級 HTML 編輯器，提供
 Word-like Ribbon 介面，並維持零 runtime dependencies。
@@ -94,7 +94,7 @@ npm run preview:site
 `npm run build:site` 也會在 `demo/assets/` 產生 classic browser bundle。完成
 建置後可直接以 `file://` 開啟 `demo/index.html`，不需要伺服器，也不會載入
 TypeScript 或觸發 ES module CORS。官網動畫使用建置期 GSAP，相依不會進入 npm
-套件；詳見 [THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/THIRD_PARTY_NOTICES.md)。
+套件；詳見 [THIRD_PARTY_NOTICES.md](https://github.com/Lian0123/scribeva-editor/blob/main/THIRD_PARTY_NOTICES.md)。
 
 ## 開發與驗證
 
@@ -107,8 +107,8 @@ npm run test:e2e
 ```
 
 AI 維護入口位於
-[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/docs/ai-maintenance/entry.md)。
+[docs/ai-maintenance/entry.md](https://github.com/Lian0123/scribeva-editor/blob/main/docs/ai-maintenance/entry.md)。
 
 ## 授權
 
-[MIT](https://github.com/Lian0123/scribeva-editor/LICENSE)
+[MIT](https://github.com/Lian0123/scribeva-editor/blob/main/LICENSE)
