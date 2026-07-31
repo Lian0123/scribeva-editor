@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=security; verified=2026-07-18; sources=src/security,tests/sanitizer.test.ts,tests/serializer.test.ts,SECURITY.md -->
+<!-- AI-DOC: owner=security; verified=2026-07-30; sources=src/security,tests/sanitizer.test.ts,tests/serializer.test.ts,SECURITY.md -->
 # HTML security and serialization
 
 `sanitizeHTML` parses input into a separate HTML document, drops dangerous
@@ -11,6 +11,10 @@ HTML source mode uses the same `EditorEngine.setHTML` path as the public API;
 scripts, event handlers, and unsupported markup are removed when the user
 applies source or leaves the HTML tab. Directional table borders use explicitly
 allowlisted top/right/bottom/left color, style, and width longhands.
+Persistent column containers use an allowed `div.scribeva-columns` with
+allowlisted `column-count` and `column-gap` styles. The serializer maps that
+class to the semantic `columns` JSON node so nested blocks round-trip without
+flattening.
 
 `htmlToJSON` maps allowed DOM to a semantic document tree. `jsonToHTML` maps the
 tree back through the sanitizer. Browser sanitization is not a replacement for

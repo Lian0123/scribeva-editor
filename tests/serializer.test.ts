@@ -18,4 +18,17 @@ describe("HTML and JSON conversion", () => {
       { type: "paragraph", content: [] },
     ]);
   });
+
+  it("round-trips column containers without flattening their blocks", () => {
+    const input =
+      '<div class="scribeva-columns" style="column-count: 2; column-gap: 32px"><p>Alpha</p><p>Beta</p></div>';
+    const json = htmlToJSON(input);
+
+    expect(json.content[0]?.type).toBe("columns");
+    expect(json.content[0]?.content?.map((node) => node.type)).toEqual([
+      "paragraph",
+      "paragraph",
+    ]);
+    expect(jsonToHTML(json)).toBe(input);
+  });
 });

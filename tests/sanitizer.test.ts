@@ -32,6 +32,16 @@ describe("sanitizeHTML", () => {
     );
   });
 
+  it("preserves safe multi-column document layout", () => {
+    expect(
+      sanitizeHTML(
+        '<div class="scribeva-columns" style="column-gap: 32px; column-count: 2; position: fixed"><p>A</p><p>B</p></div><div style="column-count: 999; column-gap: 99999px">C</div>',
+      ),
+    ).toBe(
+      '<div class="scribeva-columns" style="column-count: 2; column-gap: 32px"><p>A</p><p>B</p></div><div>C</div>',
+    );
+  });
+
   it("unwraps unknown elements while dropping dangerous element contents", () => {
     expect(sanitizeHTML("<custom>Keep</custom><iframe>Drop</iframe>")).toBe(
       "Keep",

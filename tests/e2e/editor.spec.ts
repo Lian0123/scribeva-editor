@@ -99,9 +99,86 @@ test("inserts emoji and opens document preview", async ({ page }) => {
   await page.getByRole("button", { name: "😀" }).click();
   await expect(editor).toContainText("😀");
 
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.getByRole("button", { name: "表情符號" }).click();
+  await page.getByLabel("其他表情符號").fill("🫶🏽");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "插入" })
+    .click();
+  await expect(editor).toContainText("🫶🏽");
+
   await page.getByRole("tab", { name: "檢視" }).click();
   await page.getByRole("button", { name: "預覽" }).click();
   await expect(page.locator(".scribeva__preview")).toBeVisible();
+});
+
+test("uses custom typography, mathematical symbols, and columns", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const editor = page.locator("[data-scribeva-content]");
+  const firstParagraph = editor.locator("p").first();
+
+  await firstParagraph.click();
+  const lineHeightPreset = page.locator('[data-value-preset="lineHeight"]');
+  await lineHeightPreset.selectOption("2");
+  await expect(firstParagraph).toHaveAttribute("style", /line-height: 2/);
+
+  await firstParagraph.click();
+  const lineHeight = page.locator('[data-command-value="lineHeight"]');
+  await expect(lineHeight).toBeHidden();
+  await lineHeightPreset.selectOption("");
+  await expect(lineHeight).toBeVisible();
+  const lineHeightPresetBox = await lineHeightPreset.boundingBox();
+  const lineHeightInputBox = await lineHeight.boundingBox();
+  if (!lineHeightPresetBox || !lineHeightInputBox) {
+    throw new Error("Line-height controls are not visible.");
+  }
+  expect(Math.abs(lineHeightInputBox.y - lineHeightPresetBox.y)).toBeLessThan(2);
+  expect(lineHeightInputBox.x).toBeGreaterThan(
+    lineHeightPresetBox.x + lineHeightPresetBox.width - 1,
+  );
+  await lineHeight.fill("1.8");
+  await lineHeight.press("Tab");
+  await expect(firstParagraph).toHaveAttribute("style", /line-height: 1\.8/);
+
+  await firstParagraph.selectText();
+  const fontSizePreset = page.locator('[data-value-preset="fontSize"]');
+  await fontSizePreset.selectOption("20");
+  await expect(firstParagraph.locator("span").first()).toHaveCSS(
+    "font-size",
+    "20px",
+  );
+
+  await firstParagraph.selectText();
+  const fontSize = page.locator('[data-command-value="fontSize"]');
+  await expect(fontSize).toBeHidden();
+  await fontSizePreset.selectOption("");
+  await expect(fontSize).toBeVisible();
+  await fontSize.fill("19.5");
+  await fontSize.press("Tab");
+  await expect(firstParagraph.locator("span").first()).toHaveCSS(
+    "font-size",
+    "19.5px",
+  );
+
+  await firstParagraph.click();
+  const columns = page.locator('[data-command-select="columns"]');
+  await columns.dispatchEvent("mousedown");
+  await columns.selectOption("2");
+  await expect(editor.locator(".scribeva-columns")).toHaveCSS(
+    "column-count",
+    "2",
+  );
+
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.getByRole("tab", { name: "插入" }).click();
+  await page.getByRole("button", { name: "數學符號" }).click();
+  await page.getByRole("button", { name: "∑", exact: true }).click();
+  await expect(editor).toContainText("∑");
 });
 
 test("inserts a local image as an editor-owned Blob URL", async ({ page }) => {
@@ -144,12 +221,28 @@ test("formats table borders and cell fills from the Ribbon", async ({ page }) =>
       input.dispatchEvent(new Event("change", { bubbles: true }));
     });
   await page
-    .locator('[data-command-select="tableBorderWidth"]')
+    .locator('[data-value-preset="tableBorderWidth"]')
     .selectOption("3");
 
   await expect(firstCell).toHaveCSS("background-color", "rgb(240, 223, 200)");
   await expect(firstCell).toHaveCSS("border-top-color", "rgb(123, 79, 44)");
   await expect(firstCell).toHaveCSS("border-top-width", "3px");
+
+  await firstCell.click();
+  const customBorderWidth = page.locator(
+    '[data-command-value="tableBorderWidth"]',
+  );
+  await expect(customBorderWidth).toBeHidden();
+  await page
+    .locator('[data-value-preset="tableBorderWidth"]')
+    .selectOption("");
+  await expect(customBorderWidth).toBeVisible();
+  await customBorderWidth.fill("2.5");
+  await customBorderWidth.press("Tab");
+  await expect(firstCell).toHaveAttribute("style", /border-width: 2\.5px/);
+  await expect(
+    page.locator('[data-value-preset="tableBorderWidth"]'),
+  ).toHaveValue("");
 
   await page.locator("[data-table-borders]").selectOption("top");
   await expect(firstCell).toHaveCSS("border-top-style", "solid");
@@ -159,6 +252,37 @@ test("formats table borders and cell fills from the Ribbon", async ({ page }) =>
   await firstCell.click();
   await page.locator("[data-table-borders]").selectOption("none");
   await expect(firstCell).toHaveCSS("border-top-width", "0px");
+});
+
+test("shows clear table actions and scales the document canvas", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "插入" }).click();
+  await expect(
+    page.getByRole("button", { name: "在上方新增列" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "刪除欄" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "在上方新增列" }).locator("svg"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "在上方新增列" }).locator(".scribeva__tool-text"),
+  ).toHaveCount(0);
+
+  const document = page.locator("[data-scribeva-content]");
+  const initialBox = await document.boundingBox();
+  if (!initialBox) throw new Error("Document canvas is not visible.");
+
+  await page.locator("[data-zoom]").fill("130");
+  await expect(page.locator("[data-zoom-output]")).toHaveText("130%");
+  const zoomedBox = await document.boundingBox();
+  if (!zoomedBox) throw new Error("Zoomed document canvas is not visible.");
+  expect(zoomedBox.width).toBeGreaterThan(initialBox.width * 1.25);
+
+  await page.getByRole("button", { name: "重設縮放" }).click();
+  await expect(page.locator("[data-zoom]")).toHaveValue("100");
+  await expect(page.locator("[data-zoom-output]")).toHaveText("100%");
 });
 
 test("opens the standalone file build without CORS and localizes its document", async ({
