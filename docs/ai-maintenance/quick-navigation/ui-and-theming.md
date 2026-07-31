@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=design-system; verified=2026-07-18; sources=src/ui,src/locales,src/styles.css,demo -->
+<!-- AI-DOC: owner=design-system; verified=2026-07-31; sources=src/ui,src/locales,src/styles.css,demo -->
 # UI and theming
 
 `EditorShell` creates the title bar, tabs, Home/Insert/View ribbons, document
@@ -18,8 +18,19 @@ tokens use the `--scribeva-` prefix. `data-theme` selects light, dark, or
 system. Locale dictionaries are typed against the same shape and ship for
 Traditional Chinese, English, and Japanese.
 
-The Insert tab includes URL images, Blob-backed local image upload, tables,
-emoji, and separators. View includes a sanitized document preview. Native
+Font size, line height, and table border width use the same paired value
+control. The validated numeric input stays hidden for preset values and opens,
+focuses immediately after the select on the same row, and remains synchronized
+only when the user selects the localized custom-value option. The paragraph
+group also applies one- through four-column
+layouts to the selected top-level blocks.
+
+The Insert tab includes URL images, Blob-backed local image upload, tables
+with grouped directional row/column icons, an expanded emoji picker with
+custom Unicode entry, mathematical symbols, and separators. Table action
+icons show the insertion edge or deletion axis while localized tooltips and
+accessible names preserve the full command wording. View includes a sanitized
+document preview. Native
 dialog cancellation uses a non-submit button and the dialog `cancel` event;
 only an affirmative form submit performs required-field validation. Font
 controls and CSS reference Noto Sans, Noto Serif, Noto Sans Mono, generic
@@ -34,6 +45,11 @@ run directly from `file://`. The same source produces `demo-dist` for Pages.
 SEO includes localized metadata, Open Graph/Twitter tags, SoftwareApplication
 JSON-LD, canonical/alternate links, robots, sitemap, manifest, and a branded
 social card.
+
+Document zoom uses layout-aware CSS zoom from 70% to 140%, with slider,
+increment/decrement buttons, a one-click 100% reset, synchronized status
+output, and horizontal workspace overflow when the scaled canvas is wider
+than its viewport.
 
 Verify active command state, focus visibility, dialog keyboard behavior,
 compact layout, dark mode, read-only mode, print output, and reduced motion.

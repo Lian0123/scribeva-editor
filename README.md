@@ -30,14 +30,17 @@ const editor = createEditor(document.querySelector("#editor")!, {
 ## Capabilities
 
 - Word-inspired Home, Insert, View, and HTML editing ribbons
-- Headings, inline formatting, colors, alignment, indentation, and lists
+- Headings, inline formatting, colors, alignment, indentation, lists, and
+  preset or custom font sizes and line heights
 - Links, images, tables, dividers, code blocks, and block quotes
 - HTML allowlist sanitizer and Microsoft Office paste cleanup
 - Deterministic HTML and structured JSON import/export
 - Undo/redo history, keyboard shortcuts, clipboard, and IME-aware input
 - Traditional Chinese, English, and Japanese UI
 - Light, dark, and system themes through CSS design tokens
-- Emoji picker, document preview, and Blob image insertion
+- Expanded/custom emoji, mathematical symbols, document preview, and Blob
+  image insertion
+- Persistent one- through four-column document layouts
 - Table row/column operations, headers, merge/split, vertical alignment,
   directional/all/no-border presets, outline/grid styles, border color, and
   cell fills
@@ -111,7 +114,8 @@ Content-Security-Policy:
 ```
 
 Why `style-src-attr 'unsafe-inline'`? Rich-text formatting such as color,
-alignment, font family, size, and table-cell vertical alignment is represented
+alignment, font family, size, line height, columns, and table-cell vertical
+alignment is represented
 as allowlisted inline style attributes in portable HTML. This directive is
 separate from `style-src-elem`, so external stylesheets can remain restricted
 to `'self'`. If your application disables style attributes entirely, omit
@@ -177,7 +181,7 @@ The AI-oriented living documentation starts at
 
 ## Current status
 
-Version `0.0.1` is a functional foundation. Core formatting, serialization,
+Version `0.0.3` is a functional foundation. Core formatting, serialization,
 sanitization, table operations, themes, dialogs, and package output are
 implemented. Image resize/crop, durable upload adapters, framework wrappers,
 and real-time collaboration remain future work.

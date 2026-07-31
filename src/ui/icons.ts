@@ -6,6 +6,18 @@ const paths: Record<string, string> = {
     '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 17 5-5 3.5 3.5 2-2L20 19"/>',
   table:
     '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 4v16M15 4v16"/>',
+  tableRowAbove:
+    '<rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 14.5h18M9 8v13M15 8v13M12 1.5v4M10 3.5h4"/>',
+  tableRowBelow:
+    '<rect x="3" y="3" width="18" height="13" rx="1.5"/><path d="M3 9.5h18M9 3v13M15 3v13M12 18.5v4M10 20.5h4"/>',
+  tableRowDelete:
+    '<rect x="3" y="3" width="18" height="13" rx="1.5"/><path d="M3 9.5h18M9 3v13M15 3v13M9.5 20.5h5"/>',
+  tableColumnBefore:
+    '<rect x="8" y="3" width="13" height="18" rx="1.5"/><path d="M14.5 3v18M8 9h13M8 15h13M1.5 12h4M3.5 10v4"/>',
+  tableColumnAfter:
+    '<rect x="3" y="3" width="13" height="18" rx="1.5"/><path d="M9.5 3v18M3 9h13M3 15h13M18.5 12h4M20.5 10v4"/>',
+  tableColumnDelete:
+    '<rect x="3" y="3" width="13" height="18" rx="1.5"/><path d="M9.5 3v18M3 9h13M3 15h13M18.5 12h4"/>',
   list: '<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
   numbered:
     '<path d="M10 6h11M10 12h11M10 18h11M4 4h1v4M3.5 11.5c.5-1 2.5-1 2.5.5 0 1-2 1.5-2.5 3H6M3.5 18h2a1 1 0 0 1-2 1.2M3.5 17a1 1 0 0 1 2-.2"/>',

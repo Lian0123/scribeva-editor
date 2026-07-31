@@ -26,12 +26,13 @@ const editor = createEditor(document.querySelector("#editor")!, {
 ## 主要能力
 
 - 常用、插入、檢視、HTML 編輯 Ribbon 與企業級文件畫布
-- 文字格式、標題、清單、對齊、縮排、顏色與行距
+- 文字格式、標題、清單、對齊、縮排、顏色，以及可選擇或自由輸入的字級與行距
 - 表格列／欄操作、標題列、合併拆分、垂直對齊、上／下／左／右／左右／上下／
   全部／無框線、框線樣式／色彩與填色
 - 具行號、行欄狀態、縮排、自動換行、套用／還原與 Ctrl/Command+S 的安全
   HTML 原始碼模式
-- 連結、圖片、Blob 圖片、Emoji、分隔線與文件預覽
+- 連結、圖片、Blob 圖片、擴充／自訂 Emoji、數學符號、分隔線與文件預覽
+- 可持久化且可復原／重做的一至四欄文件版面
 - HTML allowlist sanitizer、Office 貼上清理與 HTML／JSON 轉換
 - Undo／redo、鍵盤快捷鍵、clipboard 與 IME 輸入
 - 繁體中文、英文、日文；淺色、深色、系統主題
@@ -67,7 +68,7 @@ Content-Security-Policy:
   frame-ancestors 'none';
 ```
 
-文字色彩、對齊、字型、字級與表格垂直對齊會使用經 allowlist 過濾的 inline
+文字色彩、對齊、字型、字級、行距、分欄與表格垂直對齊會使用經 allowlist 過濾的 inline
 style，因此需要 `style-src-attr 'unsafe-inline'`。`style-src-elem` 仍可限制為
 `'self'`。只有使用 Blob 圖片時才需要 `img-src blob:`。正式啟用前請先用
 Report-Only 測試，後端仍必須再次 sanitize 與檢查權限。

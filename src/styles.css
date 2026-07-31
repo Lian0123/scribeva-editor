@@ -340,7 +340,8 @@
     text-decoration: line-through;
   }
 
-  .scribeva__control-row select {
+  .scribeva__control-row select,
+  .scribeva__command-value {
     height: 31px;
     min-width: 72px;
     border: 1px solid var(--scribeva-border);
@@ -349,6 +350,89 @@
     color: var(--scribeva-text);
     padding: 0 26px 0 8px;
     font-size: 11px;
+  }
+
+  .scribeva__command-value {
+    width: 68px;
+    padding: 0 8px;
+    font-variant-numeric: tabular-nums;
+    cursor: text;
+  }
+
+  .scribeva__value-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+
+  .scribeva__value-control > select {
+    min-width: 76px;
+    max-width: 92px;
+  }
+
+  .scribeva__value-entry {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .scribeva__value-entry[hidden] {
+    display: none;
+  }
+
+  .scribeva__value-entry .scribeva__command-value {
+    padding-right: 25px;
+  }
+
+  .scribeva__value-entry > span:not(.scribeva__sr-only) {
+    position: absolute;
+    right: 7px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+    pointer-events: none;
+  }
+
+  .scribeva__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .scribeva__table-actions {
+    gap: 7px;
+  }
+
+  .scribeva__table-action-set {
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  .scribeva__table-action-set + .scribeva__table-action-set {
+    padding-left: 7px;
+    border-left: 1px solid var(--scribeva-border);
+  }
+
+  .scribeva__table-actions .scribeva__tool {
+    width: 36px;
+    padding: 0;
+    border-color: color-mix(in srgb, var(--scribeva-border) 72%, transparent);
+    background: var(--scribeva-surface-muted);
+  }
+
+  .scribeva__table-actions .scribeva__tool svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .scribeva__table-actions [data-command^="tableDelete"]:hover,
+  .scribeva__table-actions [data-command^="tableDelete"]:focus-visible {
+    border-color: color-mix(in srgb, #c0392b 45%, var(--scribeva-border));
+    background: color-mix(in srgb, #c0392b 10%, var(--scribeva-surface-muted));
+    color: #a93226;
   }
 
   .scribeva__group--text .scribeva__control-row:first-child select:first-child {
@@ -540,8 +624,7 @@
     width: var(--scribeva-canvas-width);
     min-height: 1056px !important;
     padding: 78px 82px;
-    transform: scale(var(--scribeva-zoom));
-    transform-origin: top left;
+    zoom: var(--scribeva-zoom);
     border: 1px solid color-mix(in srgb, var(--scribeva-border) 75%, transparent);
     border-radius: 2px;
     background: var(--scribeva-surface-raised);
@@ -735,7 +818,8 @@
     flex: 1;
   }
 
-  .scribeva__statusbar label {
+  .scribeva__statusbar label,
+  .scribeva__zoom-control {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -749,6 +833,30 @@
   .scribeva__statusbar output {
     min-width: 34px;
     font-variant-numeric: tabular-nums;
+  }
+
+  .scribeva__zoom-control > button {
+    display: inline-grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--scribeva-text-muted);
+  }
+
+  .scribeva__zoom-control > button:hover {
+    border-color: var(--scribeva-border);
+    background: var(--scribeva-accent-soft);
+    color: var(--scribeva-accent-strong);
+  }
+
+  .scribeva__zoom-control .scribeva__zoom-reset {
+    width: auto;
+    min-width: 42px;
+    padding: 0 5px;
   }
 
   .scribeva__dialog {
@@ -874,6 +982,9 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 7px;
+    max-height: 280px;
+    overflow: auto;
+    padding: 1px;
   }
 
   .scribeva__emoji-grid button {
@@ -890,6 +1001,18 @@
   .scribeva__emoji-grid button:hover {
     border-color: var(--scribeva-accent);
     background: var(--scribeva-accent-soft);
+  }
+
+  .scribeva__symbol-grid button {
+    font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;
+  }
+
+  .scribeva-columns {
+    column-gap: 32px;
+  }
+
+  .scribeva-columns > * {
+    break-inside: avoid;
   }
 
   .scribeva__preview {
@@ -988,7 +1111,6 @@
       width: 100%;
       min-height: 720px !important;
       padding: 52px 8vw;
-      transform: none;
     }
 
     .scribeva__statusbar > span:nth-child(2) {
@@ -1026,7 +1148,7 @@
       width: 100%;
       min-height: 0 !important;
       padding: 0;
-      transform: none;
+      zoom: 1;
       border: 0;
       box-shadow: none;
     }

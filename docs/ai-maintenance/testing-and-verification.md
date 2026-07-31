@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=quality; verified=2026-07-18; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
+<!-- AI-DOC: owner=quality; verified=2026-07-31; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
 # Testing and verification
 
 | Change | Minimum verification | Additional verification |
@@ -13,6 +13,15 @@
 Tests observe contracts rather than private implementation. A bug fix includes
 a regression case. Report commands actually run and explain omitted browser or
 manual checks.
+
+Typography, table-width, Unicode picker, and column-layout specifications
+cover synchronized presets and validated custom values, selection restoration,
+custom emoji, mathematical symbols, computed column layout, sanitizer
+preservation, and HTML/JSON round trips. Zoom specifications verify the
+canvas geometry changes and that the 100% reset restores both control state
+and status output. UI specifications also assert that custom numeric entry is
+hidden until selected, directional table actions render SVG rather than visible
+text, and every icon retains a localized accessible name.
 
 Vitest coverage is a required gate: statements and lines 90%, functions 85%,
 and branches 70%. Browser specifications cover Ribbon interaction, undo/redo
@@ -29,4 +38,5 @@ Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.
 Metadata tests cover description, Open Graph image, canonical URL, and
 SoftwareApplication JSON-LD. Table Ribbon tests verify computed border and fill
-styles, not only serialized strings.
+styles, fractional custom-width serialization, and clear localized action
+names on icon-only controls.

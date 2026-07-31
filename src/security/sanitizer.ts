@@ -84,6 +84,8 @@ const ALLOWED_STYLES = new Set([
   "border-top-width",
   "border-width",
   "color",
+  "column-count",
+  "column-gap",
   "font-family",
   "font-size",
   "font-weight",
@@ -139,6 +141,14 @@ function sanitizeStyle(value: string): string {
     const rawValue = declaration.slice(separator + 1).trim();
     if (!ALLOWED_STYLES.has(property) || !rawValue) continue;
     if (/url\s*\(|expression\s*\(|javascript:|@import/i.test(rawValue)) continue;
+    if (property === "column-count" && !/^[1-4]$/.test(rawValue)) continue;
+    if (property === "column-gap") {
+      const match = /^(\d+(?:\.\d+)?)(px|em|rem)?$/.exec(rawValue);
+      if (!match) continue;
+      const amount = Number(match[1]);
+      const maximum = match[2] === "px" || !match[2] ? 200 : 12;
+      if (!Number.isFinite(amount) || amount > maximum) continue;
+    }
 
     safe.push(`${property}: ${rawValue}`);
   }

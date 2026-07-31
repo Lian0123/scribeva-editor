@@ -8,6 +8,7 @@ import { sanitizeHTML } from "./sanitizer";
 const BLOCK_TYPES: Record<string, string> = {
   blockquote: "blockquote",
   codeBlock: "pre",
+  columns: "div",
   figure: "figure",
   figcaption: "figcaption",
   heading1: "h1",
@@ -31,7 +32,9 @@ const BLOCK_TYPES: Record<string, string> = {
 };
 
 const TAG_TYPES: Record<string, string> = Object.fromEntries(
-  Object.entries(BLOCK_TYPES).map(([key, value]) => [value, key]),
+  Object.entries(BLOCK_TYPES)
+    .filter(([key]) => key !== "columns")
+    .map(([key, value]) => [value, key]),
 );
 
 const MARK_TAGS: Record<string, ScribevaMark["type"]> = {
@@ -75,7 +78,10 @@ function nodesFromDOM(node: Node, marks: ScribevaMark[] = []): ScribevaNode[] {
     );
   }
 
-  const type = TAG_TYPES[tag] ?? (tag === "br" ? "hardBreak" : "paragraph");
+  const type =
+    tag === "div" && element.classList.contains("scribeva-columns")
+      ? "columns"
+      : TAG_TYPES[tag] ?? (tag === "br" ? "hardBreak" : "paragraph");
   if (type === "horizontalRule" || type === "image" || type === "hardBreak") {
     return [{ type, attrs: attrsFromElement(element) }];
   }

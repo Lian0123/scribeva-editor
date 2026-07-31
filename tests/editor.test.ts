@@ -116,6 +116,177 @@ describe("Scribeva public editor API", () => {
     );
   });
 
+  it("offers synchronized presets and custom typography values", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, {
+      initialHTML: "<p>Custom typography</p>",
+      locale: "en",
+    });
+    const content = host.querySelector<HTMLElement>("[data-scribeva-content]")!;
+    const text = content.querySelector("p")?.firstChild;
+    if (!text) throw new Error("No text to select.");
+    content.focus();
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    const fontSize = host.querySelector<HTMLInputElement>(
+      '[data-command-value="fontSize"]',
+    )!;
+    const fontSizePreset = host.querySelector<HTMLSelectElement>(
+      '[data-value-preset="fontSize"]',
+    )!;
+    const fontSizeEntry = fontSize.closest<HTMLElement>(
+      ".scribeva__value-entry",
+    )!;
+    expect(fontSizePreset.value).toBe("16");
+    expect(fontSizeEntry.hidden).toBe(true);
+    fontSizePreset.value = "";
+    fontSizePreset.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(fontSizeEntry.hidden).toBe(false);
+    expect(document.activeElement).toBe(fontSize);
+    fontSize.value = "19.5";
+    fontSize.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(fontSizePreset.value).toBe("");
+    expect(editor.getHTML()).toContain("font-size: 19.5px");
+
+    editor.setHTML("<p>Custom typography</p>");
+    const updatedText = content.querySelector("p")?.firstChild;
+    if (!updatedText) throw new Error("No updated text to select.");
+    content.focus();
+    range.selectNodeContents(updatedText);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    const lineHeight = host.querySelector<HTMLInputElement>(
+      '[data-command-value="lineHeight"]',
+    )!;
+    const lineHeightPreset = host.querySelector<HTMLSelectElement>(
+      '[data-value-preset="lineHeight"]',
+    )!;
+    lineHeightPreset.value = "2";
+    lineHeightPreset.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(lineHeight.value).toBe("2");
+    expect(
+      lineHeight.closest<HTMLElement>(".scribeva__value-entry")?.hidden,
+    ).toBe(true);
+    expect(editor.getHTML()).toContain("line-height: 2");
+  });
+
+  it("exposes clear table actions, custom border width, and working zoom controls", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    createEditor(host, {
+      initialHTML: "<table><tbody><tr><td>Cell</td></tr></tbody></table>",
+      locale: "en",
+    });
+
+    const addRow = host.querySelector<HTMLButtonElement>(
+      '[data-command="tableAddRowBefore"]',
+    )!;
+    const deleteColumn = host.querySelector<HTMLButtonElement>(
+      '[data-command="tableDeleteColumn"]',
+    )!;
+    expect(addRow.getAttribute("aria-label")).toBe("Add row above");
+    expect(deleteColumn.getAttribute("aria-label")).toBe("Delete column");
+    expect(addRow.querySelector("svg")).not.toBeNull();
+    expect(deleteColumn.querySelector("svg")).not.toBeNull();
+    expect(addRow.querySelector(".scribeva__tool-text")).toBeNull();
+
+    const borderWidth = host.querySelector<HTMLInputElement>(
+      '[data-command-value="tableBorderWidth"]',
+    )!;
+    const borderWidthPreset = host.querySelector<HTMLSelectElement>(
+      '[data-value-preset="tableBorderWidth"]',
+    )!;
+    expect(borderWidthPreset.value).toBe("1");
+    expect(borderWidth.max).toBe("8");
+    expect(
+      borderWidth.closest<HTMLElement>(".scribeva__value-entry")?.hidden,
+    ).toBe(true);
+
+    const root = host.querySelector<HTMLElement>(".scribeva")!;
+    const zoom = host.querySelector<HTMLInputElement>("[data-zoom]")!;
+    zoom.value = "130";
+    zoom.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(root.style.getPropertyValue("--scribeva-zoom")).toBe("1.3");
+    expect(host.querySelector("[data-zoom-output]")?.textContent).toBe("130%");
+
+    host.querySelector<HTMLButtonElement>("[data-zoom-reset]")?.click();
+    expect(zoom.value).toBe("100");
+    expect(root.style.getPropertyValue("--scribeva-zoom")).toBe("1");
+  });
+
+  it("inserts mathematical symbols and user-supplied emoji", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, { initialHTML: "<p>Formula: </p>" });
+    const content = host.querySelector<HTMLElement>("[data-scribeva-content]")!;
+    placeCaretAtEnd(content);
+
+    host
+      .querySelector<HTMLButtonElement>('[data-command="dialog:symbol"]')
+      ?.click();
+    host.querySelector<HTMLButtonElement>('[data-symbol="∑"]')?.click();
+    expect(editor.getHTML()).toContain("∑");
+
+    placeCaretAtEnd(content);
+    host
+      .querySelector<HTMLButtonElement>('[data-command="dialog:symbol"]')
+      ?.click();
+    const lessThan =
+      host.querySelector<HTMLButtonElement>('[data-symbol="<"]')!;
+    expect(lessThan.textContent).toBe("<");
+    lessThan.click();
+    expect(editor.getHTML()).toContain("&lt;");
+
+    placeCaretAtEnd(content);
+    host
+      .querySelector<HTMLButtonElement>('[data-command="dialog:emoji"]')
+      ?.click();
+    const customEmoji =
+      host.querySelector<HTMLInputElement>('input[name="character"]')!;
+    customEmoji.value = "🫶🏽";
+    customEmoji
+      .closest("form")
+      ?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    expect(editor.getHTML()).toContain("🫶🏽");
+    expect(host.querySelectorAll("[data-emoji]").length).toBeGreaterThan(40);
+  });
+
+  it("applies a column layout from the Ribbon", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, {
+      initialHTML: "<p>First</p><p>Second</p>",
+      locale: "en",
+    });
+    const content = host.querySelector<HTMLElement>("[data-scribeva-content]")!;
+    const text = content.querySelector("p")?.firstChild;
+    if (!text) throw new Error("No text to select.");
+    content.focus();
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    const columns = host.querySelector<HTMLSelectElement>(
+      '[data-command-select="columns"]',
+    )!;
+    columns.dispatchEvent(
+      new MouseEvent("mousedown", { bubbles: true, cancelable: true }),
+    );
+    columns.value = "2";
+    columns.dispatchEvent(new Event("change", { bubbles: true }));
+
+    expect(editor.getHTML()).toContain(
+      'class="scribeva-columns" style="column-count: 2; column-gap: 32px"',
+    );
+  });
+
   it("edits sanitized HTML source with line numbers and keyboard controls", () => {
     const host = document.querySelector<HTMLElement>("#host")!;
     const editor = createEditor(host, {

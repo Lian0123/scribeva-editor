@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "b6d04e3054c23622a98e92e0353c8dd083356a94",
-    "indexed_at": "2026-07-18T12:57:44Z",
-    "project": "scribeva-editor",
-    "nodes": 625,
+    "commit": "7bf54f9d7b13312bd2924ba05a91762e3b0fee2e",
+    "indexed_at": "2026-07-31T15:39:07Z",
+    "project": "website-html-editor",
+    "nodes": 602,
     "edges": 1404,
-    "original_size": 2228224,
-    "compressed_size": 163882,
+    "original_size": 3080192,
+    "compressed_size": 523558,
     "compression_level": 3
 }

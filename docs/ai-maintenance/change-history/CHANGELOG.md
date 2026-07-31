@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=maintainers; verified=2026-07-18; sources=package.json,src,tests,docs/ai-maintenance -->
+<!-- AI-DOC: owner=maintainers; verified=2026-07-31; sources=package.json,src,tests,docs/ai-maintenance -->
 # Changelog
 
 ## Unreleased
@@ -37,3 +37,10 @@
   presets using the selected border color, width, and style.
 - Expanded website motion with staged hero construction, document parallax,
   page progress, editor reveal, and staggered content transitions.
+- Validated free-entry font sizes and line heights, expanded/custom emoji,
+  mathematical-symbol insertion, and persistent one- through four-column
+  document layouts with HTML/JSON round-trip coverage.
+- Synchronized preset-plus-custom controls for font size, line height, and
+  table border width with inputs shown only in custom mode; grouped directional
+  SVG table row/column actions with accessible labels; and layout-aware document
+  zoom with step controls and reset.

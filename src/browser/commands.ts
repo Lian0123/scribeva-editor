@@ -1,4 +1,4 @@
-import type { EditorCommand } from "../core/types";
+import type { EditorCommand, EditorCommandContext } from "../core/types";
 
 function selectionWithin(root: HTMLElement): Range | null {
   const selection = window.getSelection();
@@ -89,6 +89,59 @@ function applyInlineStyle(property: string): EditorCommand {
   };
 }
 
+function normalizeFontSize(rawValue: unknown): string | null {
+  const value =
+    typeof rawValue === "number"
+      ? String(rawValue)
+      : typeof rawValue === "string"
+        ? rawValue.trim()
+        : "";
+  const match = /^(\d+(?:\.\d+)?)(px|pt|em|rem|%)?$/i.exec(value);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  const unit = (match[2] ?? "px").toLowerCase();
+  const limits: Record<string, [number, number]> = {
+    px: [6, 512],
+    pt: [4.5, 384],
+    em: [0.25, 32],
+    rem: [0.25, 32],
+    "%": [25, 3200],
+  };
+  const [minimum, maximum] = limits[unit] ?? [Number.NaN, Number.NaN];
+  return Number.isFinite(amount) && amount >= minimum && amount <= maximum
+    ? `${amount}${unit}`
+    : null;
+}
+
+function normalizeLineHeight(rawValue: unknown): string | null {
+  const value =
+    typeof rawValue === "number"
+      ? String(rawValue)
+      : typeof rawValue === "string"
+        ? rawValue.trim()
+        : "";
+  const match = /^(\d+(?:\.\d+)?)(%)?$/.exec(value);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  const isPercentage = match[2] === "%";
+  const valid = isPercentage
+    ? amount >= 50 && amount <= 500
+    : amount >= 0.5 && amount <= 5;
+  return Number.isFinite(amount) && valid
+    ? `${amount}${isPercentage ? "%" : ""}`
+    : null;
+}
+
+function applyValidatedInlineStyle(
+  property: string,
+  normalize: (value: unknown) => string | null,
+): EditorCommand {
+  return (context, rawValue) => {
+    const value = normalize(rawValue);
+    return value ? applyInlineStyle(property)(context, value) : false;
+  };
+}
+
 function setBlock(tag: string): EditorCommand {
   return ({ element, commit }) => {
     const range = selectionWithin(element);
@@ -129,6 +182,78 @@ function setBlockStyle(property: string): EditorCommand {
     commit("command");
     return true;
   };
+}
+
+function setValidatedBlockStyle(
+  property: string,
+  normalize: (value: unknown) => string | null,
+): EditorCommand {
+  return (context, rawValue) => {
+    const value = normalize(rawValue);
+    return value ? setBlockStyle(property)(context, value) : false;
+  };
+}
+
+function topLevelElement(node: Node, root: HTMLElement): HTMLElement | null {
+  let element =
+    node.nodeType === Node.ELEMENT_NODE
+      ? (node as HTMLElement)
+      : node.parentElement;
+  while (element?.parentElement && element.parentElement !== root) {
+    element = element.parentElement;
+  }
+  return element?.parentElement === root ? element : null;
+}
+
+function setColumns(
+  { element, commit }: EditorCommandContext,
+  rawValue: unknown,
+): boolean {
+  const value =
+    typeof rawValue === "number"
+      ? rawValue
+      : typeof rawValue === "string" && /^\d+$/.test(rawValue.trim())
+        ? Number(rawValue)
+        : Number.NaN;
+  if (![1, 2, 3, 4].includes(value)) return false;
+
+  const range = selectionWithin(element);
+  if (!range) return false;
+  const existing = closestElement(
+    range.startContainer,
+    "div.scribeva-columns",
+    element,
+  );
+  if (existing) {
+    if (value === 1) {
+      existing.replaceWith(...Array.from(existing.childNodes));
+    } else {
+      existing.style.columnCount = String(value);
+      existing.style.columnGap = "32px";
+    }
+    commit("command");
+    return true;
+  }
+  if (value === 1) return false;
+
+  const start = topLevelElement(range.startContainer, element);
+  const end = topLevelElement(range.endContainer, element);
+  if (!start || !end) return false;
+  const children = Array.from(element.children);
+  const startIndex = children.indexOf(start);
+  const endIndex = children.indexOf(end);
+  if (startIndex < 0 || endIndex < startIndex) return false;
+
+  const columns = document.createElement("div");
+  columns.className = "scribeva-columns";
+  columns.style.columnCount = String(value);
+  columns.style.columnGap = "32px";
+  start.before(columns);
+  children
+    .slice(startIndex, endIndex + 1)
+    .forEach((child) => columns.append(child));
+  commit("command");
+  return true;
 }
 
 function toggleList(tag: "ul" | "ol"): EditorCommand {
@@ -612,9 +737,9 @@ export function createDefaultCommands(): Record<string, EditorCommand> {
     bulletList: toggleList("ul"),
     orderedList: toggleList("ol"),
     align: setBlockStyle("text-align"),
-    lineHeight: setBlockStyle("line-height"),
+    lineHeight: setValidatedBlockStyle("line-height", normalizeLineHeight),
     fontFamily: applyInlineStyle("font-family"),
-    fontSize: applyInlineStyle("font-size"),
+    fontSize: applyValidatedInlineStyle("font-size", normalizeFontSize),
     textColor: applyInlineStyle("color"),
     highlight: applyInlineStyle("background-color"),
     indent: ({ element, commit }) => {
@@ -678,6 +803,7 @@ export function createDefaultCommands(): Record<string, EditorCommand> {
       return true;
     },
     horizontalRule: insertHorizontalRule,
+    columns: setColumns,
     selectAll,
   };
 }

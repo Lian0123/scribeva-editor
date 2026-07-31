@@ -9,34 +9,165 @@ import { EditorEngine } from "../browser/editor-engine";
 import { getLocale, type ScribevaLocale } from "../locales";
 import { icon } from "./icons";
 
-type DialogKind = "link" | "image" | "table" | "emoji" | "preview";
+type DialogKind =
+  | "link"
+  | "image"
+  | "table"
+  | "emoji"
+  | "symbol"
+  | "preview";
 
 const EMOJI = [
   "😀",
+  "😃",
+  "😄",
+  "😁",
   "😂",
+  "🤣",
+  "🥹",
   "🥰",
   "😍",
   "🤩",
   "😊",
+  "😌",
+  "😉",
+  "🙃",
+  "😎",
+  "🤓",
+  "🧐",
+  "🤔",
+  "🤗",
+  "🤭",
+  "🫢",
+  "🫡",
+  "🥳",
+  "😴",
+  "😭",
+  "😤",
+  "😱",
   "🙏",
   "👏",
+  "🙌",
+  "🤝",
+  "💪",
   "👍",
   "👎",
+  "👌",
+  "✌️",
+  "🤞",
+  "🫶",
+  "👀",
   "🎉",
+  "🎊",
+  "🎯",
+  "🏆",
   "✨",
+  "⭐",
   "🔥",
+  "💯",
   "💡",
   "✅",
+  "❌",
   "⚠️",
   "❤️",
+  "🧡",
+  "💛",
+  "💚",
+  "💙",
+  "💜",
+  "🖤",
   "💬",
   "📌",
   "📎",
+  "📅",
+  "📊",
+  "📈",
+  "📚",
   "🚀",
+  "🌟",
+  "🌈",
+  "🌱",
   "🌏",
+  "☀️",
+  "🌙",
   "📝",
+  "🔍",
   "🔒",
+  "🔓",
+  "⚙️",
+  "🧩",
+  "🎨",
+  "💻",
 ];
+
+const MATH_SYMBOLS = [
+  "+",
+  "−",
+  "×",
+  "÷",
+  "±",
+  "∓",
+  "=",
+  "≠",
+  "≈",
+  "≡",
+  "<",
+  ">",
+  "≤",
+  "≥",
+  "∞",
+  "√",
+  "∛",
+  "∑",
+  "∏",
+  "∫",
+  "∬",
+  "∂",
+  "∇",
+  "∆",
+  "π",
+  "α",
+  "β",
+  "γ",
+  "δ",
+  "θ",
+  "λ",
+  "μ",
+  "σ",
+  "φ",
+  "ω",
+  "∈",
+  "∉",
+  "⊂",
+  "⊆",
+  "∪",
+  "∩",
+  "∧",
+  "∨",
+  "¬",
+  "⇒",
+  "⇔",
+  "∴",
+  "∵",
+  "°",
+  "‰",
+];
+
+function escapeMarkup(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function characterButton(
+  character: string,
+  kind: "emoji" | "symbol",
+): string {
+  const safeCharacter = escapeMarkup(character);
+  return `<button type="button" data-insert-character="${safeCharacter}" data-${kind}="${safeCharacter}" aria-label="${safeCharacter}">${safeCharacter}</button>`;
+}
 
 export class EditorShell implements ScribevaEditor {
   readonly #host: HTMLElement;
@@ -251,10 +382,15 @@ export class EditorShell implements ScribevaEditor {
         <span class="scribeva__status-ready"><i></i>${l.status.ready}</span>
         <span data-scribeva-status></span>
         <span class="scribeva__status-spacer"></span>
-        <label>${l.status.zoom}
-          <input type="range" min="70" max="140" value="100" step="10" data-zoom>
-          <output data-zoom-output>100%</output>
-        </label>
+        <div class="scribeva__zoom-control" role="group" aria-label="${l.status.zoom}">
+          <span>${l.status.zoom}</span>
+          <button type="button" data-zoom-step="-10" aria-label="${l.chrome.zoomOut}">−</button>
+          <input type="range" min="70" max="140" value="100" step="10" data-zoom aria-label="${l.status.zoom}">
+          <button type="button" data-zoom-step="10" aria-label="${l.chrome.zoomIn}">＋</button>
+          <button type="button" class="scribeva__zoom-reset" data-zoom-reset aria-label="${l.chrome.resetZoom}">
+            <output data-zoom-output>100%</output>
+          </button>
+        </div>
       </footer>
 
       <dialog class="scribeva__dialog" aria-labelledby="scribeva-dialog-title">
@@ -278,10 +414,43 @@ export class EditorShell implements ScribevaEditor {
   }
 
   #button(command: string, label: string, iconName?: string, text?: string): string {
-    return `<button class="scribeva__tool" data-command="${command}" title="${label}">
+    return `<button class="scribeva__tool" data-command="${command}" title="${label}" aria-label="${label}">
       ${iconName ? icon(iconName) : `<span class="scribeva__tool-text">${text ?? label}</span>`}
       <small>${label}</small>
     </button>`;
+  }
+
+  #valueControl(
+    command: string,
+    label: string,
+    presets: readonly number[],
+    options: {
+      defaultValue: number;
+      min: number;
+      max: number;
+      step: number;
+      unit?: string;
+    },
+  ): string {
+    const { defaultValue, min, max, step, unit } = options;
+    const l = this.#locale;
+    return `<span class="scribeva__value-control" role="group" aria-label="${label}">
+      <select data-value-preset="${command}" aria-label="${label} · ${l.chrome.presets}">
+        ${presets
+          .map(
+            (value) =>
+              `<option value="${value}"${value === defaultValue ? " selected" : ""}>${value}${unit ? ` ${unit}` : ""}</option>`,
+          )
+          .join("")}
+        <option value="">${l.chrome.customValue}</option>
+      </select>
+      <label class="scribeva__value-entry" hidden>
+        <span class="scribeva__sr-only">${label} · ${l.chrome.customValue}</span>
+        <input class="scribeva__command-value" type="number" min="${min}" max="${max}" step="${step}" value="${defaultValue}"
+          data-command-value="${command}" aria-label="${label} · ${l.chrome.customValue}">
+        ${unit ? `<span aria-hidden="true">${unit}</span>` : ""}
+      </label>
+    </span>`;
   }
 
   #historyGroup(): string {
@@ -304,11 +473,13 @@ export class EditorShell implements ScribevaEditor {
           <option value="'Noto Serif TC', 'Noto Serif JP', 'Noto Serif', serif">Noto Serif</option>
           <option value="'Noto Sans Mono', monospace">Noto Sans Mono</option>
         </select>
-        <select data-command-select="fontSize" aria-label="${l.chrome.fontSize}">
-          ${[12, 14, 16, 18, 20, 24, 32, 40]
-            .map((size) => `<option value="${size}px"${size === 16 ? " selected" : ""}>${size}</option>`)
-            .join("")}
-        </select>
+        ${this.#valueControl("fontSize", l.chrome.fontSize, [12, 14, 16, 18, 20, 24, 32, 40], {
+          defaultValue: 16,
+          min: 6,
+          max: 512,
+          step: 0.5,
+          unit: "px",
+        })}
       </div>
       <div class="scribeva__control-row">
         ${this.#button("bold", l.commands.bold, undefined, "B")}
@@ -342,11 +513,17 @@ export class EditorShell implements ScribevaEditor {
         ${this.#button("align:center", l.commands.alignCenter, "alignCenter")}
         ${this.#button("align:right", l.commands.alignRight, "alignRight")}
         ${this.#button("align:justify", l.commands.justify, "justify")}
-        <select data-command-select="lineHeight" aria-label="${l.chrome.lineHeight}">
-          <option value="1.2">1.2</option>
-          <option value="1.5" selected>1.5</option>
-          <option value="1.75">1.75</option>
-          <option value="2">2.0</option>
+        ${this.#valueControl("lineHeight", l.chrome.lineHeight, [1, 1.2, 1.5, 1.75, 2, 2.5, 3], {
+          defaultValue: 1.5,
+          min: 0.5,
+          max: 5,
+          step: 0.05,
+        })}
+        <select data-command-select="columns" aria-label="${l.commands.columns}">
+          <option value="1">${l.commands.oneColumn}</option>
+          <option value="2">${l.commands.twoColumns}</option>
+          <option value="3">${l.commands.threeColumns}</option>
+          <option value="4">${l.commands.fourColumns}</option>
         </select>
       </div>
       <h3>${l.groups.paragraph}</h3>
@@ -362,19 +539,24 @@ export class EditorShell implements ScribevaEditor {
         ${this.#button("imageUpload", l.commands.imageUpload, "image")}
         ${this.#button("dialog:table", l.commands.table, "table")}
         ${this.#button("dialog:emoji", l.commands.emoji, undefined, "😊")}
+        ${this.#button("dialog:symbol", l.commands.symbol, undefined, "∑")}
         ${this.#button("horizontalRule", l.commands.horizontalRule, "divider")}
       </div>
       <input type="file" accept="image/*" data-image-upload hidden>
       <h3>${l.groups.insert}</h3>
     </section>
     <section class="scribeva__group scribeva__group--table">
-      <div class="scribeva__control-row">
-        ${this.#button("tableAddRowBefore", l.commands.tableAddRowBefore, undefined, "↑+")}
-        ${this.#button("tableAddRowAfter", l.commands.tableAddRowAfter, undefined, "↓+")}
-        ${this.#button("tableDeleteRow", l.commands.tableDeleteRow, undefined, "−R")}
-        ${this.#button("tableAddColumnBefore", l.commands.tableAddColumnBefore, undefined, "←+")}
-        ${this.#button("tableAddColumnAfter", l.commands.tableAddColumnAfter, undefined, "→+")}
-        ${this.#button("tableDeleteColumn", l.commands.tableDeleteColumn, undefined, "−C")}
+      <div class="scribeva__control-row scribeva__table-actions">
+        <span class="scribeva__table-action-set" role="group" aria-label="${l.dialog.rows}">
+          ${this.#button("tableAddRowBefore", l.commands.tableAddRowBefore, "tableRowAbove")}
+          ${this.#button("tableAddRowAfter", l.commands.tableAddRowAfter, "tableRowBelow")}
+          ${this.#button("tableDeleteRow", l.commands.tableDeleteRow, "tableRowDelete")}
+        </span>
+        <span class="scribeva__table-action-set" role="group" aria-label="${l.dialog.columns}">
+          ${this.#button("tableAddColumnBefore", l.commands.tableAddColumnBefore, "tableColumnBefore")}
+          ${this.#button("tableAddColumnAfter", l.commands.tableAddColumnAfter, "tableColumnAfter")}
+          ${this.#button("tableDeleteColumn", l.commands.tableDeleteColumn, "tableColumnDelete")}
+        </span>
       </div>
       <div class="scribeva__control-row">
         ${this.#button("tableHeaderRow", l.commands.tableHeaderRow, undefined, "TH")}
@@ -396,13 +578,13 @@ export class EditorShell implements ScribevaEditor {
           <span aria-hidden="true">▧</span>
           <input type="color" value="#e4eee8" data-command-input="tableFillColor" aria-label="${l.commands.tableFillColor}">
         </label>
-        <select data-command-select="tableBorderWidth" aria-label="${l.commands.tableBorderWidth}">
-          <option value="0">0 px</option>
-          <option value="1" selected>1 px</option>
-          <option value="2">2 px</option>
-          <option value="3">3 px</option>
-          <option value="4">4 px</option>
-        </select>
+        ${this.#valueControl("tableBorderWidth", l.commands.tableBorderWidth, [0, 1, 2, 3, 4], {
+          defaultValue: 1,
+          min: 0,
+          max: 8,
+          step: 0.5,
+          unit: "px",
+        })}
         <select data-command-select="tableBorderStyle" aria-label="${l.commands.tableBorderStyle}">
           <option value="solid">━━</option>
           <option value="dashed">┅┅</option>
@@ -469,9 +651,12 @@ export class EditorShell implements ScribevaEditor {
     this.#root.addEventListener(
       "mousedown",
       (event) => {
-        if ((event.target as Element).closest("[data-command]")) {
+        const control = (event.target as Element).closest(
+          "[data-command],[data-command-select],[data-command-value],[data-value-preset],[data-command-input],[data-block-select],[data-table-borders]",
+        );
+        if (control) {
           this.#captureSelection();
-          event.preventDefault();
+          if (control.matches("[data-command]")) event.preventDefault();
         }
       },
       { signal },
@@ -490,10 +675,12 @@ export class EditorShell implements ScribevaEditor {
         if (target.closest('[data-action="theme"]')) this.#toggleTheme();
         if (target.closest("[data-dialog-cancel]")) this.#dialog.close("cancel");
 
-        const emojiButton = target.closest<HTMLButtonElement>("[data-emoji]");
-        if (emojiButton?.dataset.emoji) {
+        const characterButton = target.closest<HTMLButtonElement>(
+          "[data-insert-character]",
+        );
+        if (characterButton?.dataset.insertCharacter) {
           this.#dialog.close("cancel");
-          this.exec("insertText", emojiButton.dataset.emoji);
+          this.exec("insertText", characterButton.dataset.insertCharacter);
         }
       },
       { signal },
@@ -511,8 +698,8 @@ export class EditorShell implements ScribevaEditor {
           const color = this.#root.querySelector<HTMLInputElement>(
             '[data-command-input="tableBorderColor"]',
           )?.value;
-          const width = this.#root.querySelector<HTMLSelectElement>(
-            '[data-command-select="tableBorderWidth"]',
+          const width = this.#root.querySelector<HTMLInputElement>(
+            '[data-command-value="tableBorderWidth"]',
           )?.value;
           const style = this.#root.querySelector<HTMLSelectElement>(
             '[data-command-select="tableBorderStyle"]',
@@ -524,6 +711,38 @@ export class EditorShell implements ScribevaEditor {
             style,
           });
           target.value = "";
+        } else if (target.matches("[data-value-preset]")) {
+          const command = target.dataset.valuePreset;
+          if (!command) return;
+          const input = this.#root.querySelector<HTMLInputElement>(
+            `[data-command-value="${command}"]`,
+          );
+          const entry = input?.closest<HTMLElement>(".scribeva__value-entry");
+          if (target.value === "") {
+            if (entry) entry.hidden = false;
+            input?.focus();
+            input?.select();
+            return;
+          }
+          if (input) input.value = target.value;
+          if (entry) entry.hidden = true;
+          this.exec(command, target.value);
+        } else if (target.matches("[data-command-value]")) {
+          const command = target.dataset.commandValue!;
+          const preset = this.#root.querySelector<HTMLSelectElement>(
+            `[data-value-preset="${command}"]`,
+          );
+          if (preset) {
+            const isPreset = Array.from(preset.options).some(
+              (option) => option.value === target.value,
+            );
+            preset.value = isPreset ? target.value : "";
+            const entry = target.closest<HTMLElement>(
+              ".scribeva__value-entry",
+            );
+            if (entry) entry.hidden = isPreset;
+          }
+          this.exec(command, target.value);
         } else if (target.matches("[data-command-select]")) {
           this.exec(target.dataset.commandSelect!, target.value);
         } else if (target.matches("[data-command-input]")) {
@@ -538,18 +757,42 @@ export class EditorShell implements ScribevaEditor {
     );
 
     const zoom = this.#root.querySelector<HTMLInputElement>("[data-zoom]");
+    const updateZoom = (value: number): void => {
+      if (!zoom || !Number.isFinite(value)) return;
+      const minimum = Number(zoom.min);
+      const maximum = Number(zoom.max);
+      const percentage = Math.min(maximum, Math.max(minimum, value));
+      zoom.value = String(percentage);
+      const scale = percentage / 100;
+      this.#root.style.setProperty("--scribeva-zoom", String(scale));
+      const output = this.#root.querySelector<HTMLOutputElement>(
+        "[data-zoom-output]",
+      );
+      if (output) output.value = `${percentage}%`;
+    };
+
     zoom?.addEventListener(
       "input",
       () => {
-        const scale = Number(zoom.value) / 100;
-        this.#root.style.setProperty("--scribeva-zoom", String(scale));
-        const output = this.#root.querySelector<HTMLOutputElement>(
-          "[data-zoom-output]",
-        );
-        if (output) output.value = `${zoom.value}%`;
+        updateZoom(Number(zoom.value));
       },
       { signal },
     );
+    this.#root
+      .querySelectorAll<HTMLElement>("[data-zoom-step]")
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+          () =>
+            updateZoom(
+              Number(zoom?.value ?? 100) + Number(button.dataset.zoomStep),
+            ),
+          { signal },
+        );
+      });
+    this.#root
+      .querySelector<HTMLElement>("[data-zoom-reset]")
+      ?.addEventListener("click", () => updateZoom(100), { signal });
 
     this.#source.addEventListener("input", () => this.#updateSourceMetrics(), {
       signal,
@@ -776,9 +1019,15 @@ export class EditorShell implements ScribevaEditor {
     } else if (kind === "emoji") {
       title.textContent = l.emojiTitle;
       fields.innerHTML = `<div class="scribeva__emoji-grid">${EMOJI.map(
-        (emoji) =>
-          `<button type="button" data-emoji="${emoji}" aria-label="${emoji}">${emoji}</button>`,
-      ).join("")}</div>`;
+        (emoji) => characterButton(emoji, "emoji"),
+      ).join("")}</div>
+        <label>${l.customEmoji}<input name="character" type="text" maxlength="32" required autocomplete="off"></label>`;
+    } else if (kind === "symbol") {
+      title.textContent = l.symbolTitle;
+      fields.innerHTML = `<div class="scribeva__emoji-grid scribeva__symbol-grid">${MATH_SYMBOLS.map(
+        (symbol) => characterButton(symbol, "symbol"),
+      ).join("")}</div>
+        <label>${l.customSymbol}<input name="character" type="text" maxlength="32" required autocomplete="off"></label>`;
     } else {
       title.textContent = l.previewTitle;
       fields.innerHTML = `<article class="scribeva__preview">${this.#engine.getHTML()}</article>`;
@@ -812,6 +1061,9 @@ export class EditorShell implements ScribevaEditor {
         columns: Number(data.get("columns")),
         header: data.get("header") === "on",
       });
+    } else if (kind === "emoji" || kind === "symbol") {
+      const character = String(data.get("character") ?? "").trim();
+      if (character) this.exec("insertText", character);
     }
     form.reset();
   }

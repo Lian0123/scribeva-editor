@@ -85,6 +85,64 @@ describe("default editor commands", () => {
     expect(engine.getHTML()).toContain("margin-left: 0px");
   });
 
+  it("accepts validated custom font sizes and line heights", () => {
+    const engine = new EditorEngine(root, "<p>Hello</p>");
+
+    selectText(root, 0, 5);
+    expect(engine.exec("fontSize", "18.5")).toBe(true);
+    expect(engine.getHTML()).toContain("font-size: 18.5px");
+
+    engine.setHTML("<p>Hello</p>");
+    selectText(root, 0, 5);
+    expect(engine.exec("fontSize", "21pt")).toBe(true);
+    expect(engine.getHTML()).toContain("font-size: 21pt");
+
+    engine.setHTML("<p>Hello</p>");
+    selectText(root, 0, 5);
+    expect(engine.exec("lineHeight", "1.65")).toBe(true);
+    expect(engine.getHTML()).toContain("line-height: 1.65");
+
+    selectText(root, 0, 5);
+    expect(engine.exec("fontSize", "calc(1px + 1vw)")).toBe(false);
+    expect(engine.exec("fontSize", "9999px")).toBe(false);
+    expect(engine.exec("lineHeight", "0.1")).toBe(false);
+    expect(engine.exec("lineHeight", "normal; color: red")).toBe(false);
+  });
+
+  it("wraps selected blocks in persistent columns and removes columns", () => {
+    const engine = new EditorEngine(
+      root,
+      "<p>Alpha</p><p>Beta</p><p>Gamma</p>",
+    );
+    const firstText = root.querySelector("p")?.firstChild;
+    const lastText = root.querySelectorAll("p")[1]?.firstChild;
+    if (!firstText || !lastText) throw new Error("No selectable blocks.");
+    const range = document.createRange();
+    range.setStart(firstText, 0);
+    range.setEnd(lastText, lastText.textContent?.length ?? 0);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    expect(engine.exec("columns", "2")).toBe(true);
+    expect(engine.getHTML()).toBe(
+      '<div class="scribeva-columns" style="column-count: 2; column-gap: 32px"><p>Alpha</p><p>Beta</p></div><p>Gamma</p>',
+    );
+
+    selectText(root, 0, 5);
+    expect(engine.exec("columns", "3")).toBe(true);
+    expect(engine.getHTML()).toContain("column-count: 3");
+
+    selectText(root, 0, 5);
+    expect(engine.exec("columns", "1")).toBe(true);
+    expect(engine.getHTML()).toBe(
+      "<p>Alpha</p><p>Beta</p><p>Gamma</p>",
+    );
+
+    selectText(root, 0, 5);
+    expect(engine.exec("columns", "8")).toBe(false);
+  });
+
   it("toggles ordered and unordered lists", () => {
     const engine = new EditorEngine(root, "<p>Item</p>");
     selectText(root);
