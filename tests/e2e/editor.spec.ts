@@ -508,12 +508,25 @@ test("publishes complete product SEO metadata", async ({ page }) => {
     "href",
     "https://lianyongli.github.io/scribeva-editor/",
   );
-  const structuredData = await page
-    .locator('script[type="application/ld+json"]')
-    .textContent();
-  expect(JSON.parse(structuredData ?? "{}")["@type"]).toBe(
-    "SoftwareApplication",
+  await expect(page.locator('meta[name="googlebot"]')).toHaveAttribute(
+    "content",
+    /index,follow/,
   );
+  await expect(page.locator('link[rel="alternate"][type="text/plain"]')).toHaveAttribute(
+    "href",
+    /llms\.txt$/,
+  );
+  const structuredData = await page
+    .locator("#structured-data")
+    .textContent();
+  const graph = JSON.parse(structuredData ?? "{}")["@graph"] as Array<{ "@type": string }>;
+  expect(graph.map((item) => item["@type"])).toEqual(
+    expect.arrayContaining(["WebSite", "WebPage", "SoftwareApplication", "Organization"]),
+  );
+  await page.locator("#site-locale").selectOption("en");
+  const localizedPage = JSON.parse(await page.locator("#structured-data").textContent() ?? "{}")["@graph"]
+    .find((item: { "@type": string }) => item["@type"] === "WebPage");
+  expect(localizedPage.inLanguage).toBe("en");
 });
 
 test("matches the desktop visual baseline", async ({ page, browserName }) => {

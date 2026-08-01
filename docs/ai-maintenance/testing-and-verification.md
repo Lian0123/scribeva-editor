@@ -50,7 +50,8 @@ clearing classname-based motion while preserving document text across HTML mode.
 
 Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.
-Metadata tests cover description, Open Graph image, canonical URL, and
-SoftwareApplication JSON-LD. Table Ribbon tests verify computed border and fill
+Metadata tests cover description, Googlebot directives, Open Graph image,
+canonical URL, `llms.txt`, localized JSON-LD graph entities, and language updates.
+Table Ribbon tests verify computed border and fill
 styles, fractional custom-width serialization, and clear localized action
 names on icon-only controls.

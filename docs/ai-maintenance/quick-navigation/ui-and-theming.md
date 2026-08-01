@@ -80,8 +80,9 @@ parallax, reading progress, section choreography, and editor/detail reveals,
 all with a reduced-motion escape. Its
 classic IIFE bundle is copied to `demo/assets`, allowing `demo/index.html` to
 run directly from `file://`. The same source produces `demo-dist` for Pages.
-SEO includes localized metadata, Open Graph/Twitter tags, SoftwareApplication
-JSON-LD, canonical/alternate links, robots, sitemap, manifest, and a branded
+SEO includes localized metadata, Open Graph/Twitter tags, WebSite/WebPage/
+SoftwareApplication/Organization JSON-LD, canonical/alternate links, robots,
+sitemap, manifest, and an AI-readable `llms.txt` product summary, plus a branded
 social card.
 
 Document zoom uses layout-aware CSS zoom from 70% to 140%, with slider,

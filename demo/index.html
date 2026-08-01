@@ -6,6 +6,9 @@
     <meta name="theme-color" content="#0b3d2e">
     <meta name="color-scheme" content="light">
     <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="format-detection" content="telephone=no">
     <meta name="author" content="Scribeva Editor contributors">
     <meta name="application-name" content="Scribeva Editor">
     <meta
@@ -17,6 +20,7 @@
       content="Scribeva Editor 是零執行期相依、MIT 授權的企業級 HTML 編輯器，提供專業 Ribbon 介面、安全內容管線與可攜式 HTML。"
     >
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lianyongli.github.io/scribeva-editor/">
     <meta property="og:site_name" content="Scribeva Editor">
     <meta property="og:locale" content="zh_TW">
     <meta property="og:title" content="Scribeva Editor｜可攜式專業 HTML 編輯器">
@@ -32,6 +36,8 @@
     <meta property="og:image:height" content="896">
     <meta property="og:image:alt" content="Scribeva Editor — Portable writing infrastructure.">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Lian0123">
+    <meta name="twitter:url" content="https://lianyongli.github.io/scribeva-editor/">
     <meta name="twitter:title" content="Scribeva Editor｜可攜式專業 HTML 編輯器">
     <meta
       name="twitter:description"
@@ -42,6 +48,8 @@
       content="https://lianyongli.github.io/scribeva-editor/og-scribeva.png"
     >
     <link rel="canonical" href="https://lianyongli.github.io/scribeva-editor/">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="alternate" type="text/plain" href="./llms.txt" title="Scribeva Editor AI-readable summary">
     <link rel="alternate" hreflang="zh-Hant" href="https://lianyongli.github.io/scribeva-editor/?lang=zh-TW">
     <link rel="alternate" hreflang="en" href="https://lianyongli.github.io/scribeva-editor/?lang=en">
     <link rel="alternate" hreflang="ja" href="https://lianyongli.github.io/scribeva-editor/?lang=ja">
@@ -49,25 +57,53 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%230b3d2e%22/><text x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-size=%2236%22 fill=%22%23f2efe4%22>S</text></svg>">
     <link rel="stylesheet" href="./assets/site.css">
     <title>Scribeva Editor｜可攜式專業 HTML 編輯器</title>
-    <script type="application/ld+json">
+    <script id="structured-data" type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Scribeva Editor",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Web",
-        "description": "A framework-independent, MIT-licensed enterprise HTML editor with zero runtime dependencies.",
-        "softwareVersion": "0.0.1",
-        "license": "https://opensource.org/license/mit",
-        "url": "https://lianyongli.github.io/scribeva-editor/",
-        "downloadUrl": "https://www.npmjs.com/package/scribeva-editor",
-        "programmingLanguage": "TypeScript",
-        "isAccessibleForFree": true,
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://lianyongli.github.io/scribeva-editor/#website",
+            "url": "https://lianyongli.github.io/scribeva-editor/",
+            "name": "Scribeva Editor",
+            "description": "可攜式、框架無關的企業級 HTML 富文字編輯器。",
+            "inLanguage": ["zh-Hant", "en", "ja"],
+            "publisher": {"@id": "https://lianyongli.github.io/scribeva-editor/#organization"}
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://lianyongli.github.io/scribeva-editor/#webpage",
+            "url": "https://lianyongli.github.io/scribeva-editor/",
+            "name": "Scribeva Editor｜可攜式專業 HTML 編輯器",
+            "isPartOf": {"@id": "https://lianyongli.github.io/scribeva-editor/#website"},
+            "about": {"@id": "https://lianyongli.github.io/scribeva-editor/#software"},
+            "inLanguage": "zh-Hant"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://lianyongli.github.io/scribeva-editor/#software",
+            "name": "Scribeva Editor",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Web",
+            "description": "A framework-independent, MIT-licensed enterprise HTML editor with zero runtime dependencies.",
+            "softwareVersion": "0.0.4",
+            "license": "https://opensource.org/license/mit",
+            "url": "https://lianyongli.github.io/scribeva-editor/",
+            "downloadUrl": "https://www.npmjs.com/package/scribeva-editor",
+            "programmingLanguage": "TypeScript",
+            "featureList": ["Rich text editing", "Sanitized HTML serialization", "Structured JSON", "Responsive Ribbon UI", "Chinese, English, and Japanese locales"],
+            "isAccessibleForFree": true,
+            "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+            "publisher": {"@id": "https://lianyongli.github.io/scribeva-editor/#organization"}
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://lianyongli.github.io/scribeva-editor/#organization",
+            "name": "Scribeva Editor contributors",
+            "url": "https://github.com/Lian0123/scribeva-editor",
+            "sameAs": ["https://github.com/Lian0123/scribeva-editor", "https://www.npmjs.com/package/scribeva-editor"]
+          }
+        ]
       }
     </script>
   </head>
