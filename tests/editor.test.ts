@@ -243,6 +243,11 @@ describe("Scribeva public editor API", () => {
     accent.dispatchEvent(new Event("change", { bubbles: true }));
     expect(root.style.getPropertyValue("--scribeva-accent")).toBe("#df5b3f");
     expect(host.querySelector("[data-accent-value]")?.textContent).toBe("#DF5B3F");
+    const secondary = host.querySelector<HTMLInputElement>("[data-secondary-color]")!;
+    secondary.value = "#2878a8";
+    secondary.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.style.getPropertyValue("--scribeva-secondary")).toBe("#2878a8");
+    expect(host.querySelector("[data-secondary-value]")?.textContent).toBe("#2878A8");
     expect(sticky.checked).toBe(false);
     sticky.checked = true;
     sticky.dispatchEvent(new Event("change", { bubbles: true }));
@@ -273,6 +278,48 @@ describe("Scribeva public editor API", () => {
     expect(
       host.querySelector<HTMLButtonElement>('[data-command="pageBreak"] svg'),
     ).not.toBeNull();
+  });
+
+  it("applies editor-only text animation without changing exported HTML", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, { initialHTML: "<p>Animated copy</p>", locale: "en" });
+    const content = host.querySelector<HTMLElement>("[data-scribeva-content]")!;
+    const paragraph = content.querySelector("p")!;
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    host.querySelector<HTMLButtonElement>('[data-tab="animation"]')?.click();
+    host.querySelector<HTMLSelectElement>("[data-animation-effect]")!.value = "bounce";
+    const durationSelect = host.querySelector<HTMLSelectElement>("[data-animation-duration]")!;
+    durationSelect.value = "custom";
+    durationSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    host.querySelector<HTMLInputElement>("[data-animation-duration-input]")!.value = "1250";
+    const delaySelect = host.querySelector<HTMLSelectElement>("[data-animation-delay]")!;
+    delaySelect.value = "custom";
+    delaySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    host.querySelector<HTMLInputElement>("[data-animation-delay-input]")!.value = "275";
+    const intensitySelect = host.querySelector<HTMLSelectElement>("[data-animation-intensity]")!;
+    intensitySelect.value = "custom";
+    intensitySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    host.querySelector<HTMLInputElement>("[data-animation-intensity-input]")!.value = "135";
+    host.querySelector<HTMLButtonElement>('[data-command="animation:apply"]')?.click();
+    expect(paragraph.classList.contains("scribeva-motion-bounce")).toBe(true);
+    expect(paragraph.style.getPropertyValue("--scribeva-motion-duration")).toBe("1250ms");
+    expect(editor.getHTML()).toContain("scribeva-motion-duration-1250");
+    expect(editor.getHTML()).toContain("scribeva-motion-delay-275");
+    expect(editor.getHTML()).toContain("scribeva-motion-intensity-135");
+    host.querySelector<HTMLButtonElement>('[data-tab="html"]')?.click();
+    const source = host.querySelector<HTMLTextAreaElement>("[data-scribeva-source]")!;
+    expect(source.value).toContain("scribeva-motion-bounce");
+    source.value = "<p>Animated copy</p>";
+    host.querySelector<HTMLButtonElement>('[data-command="source:apply"]')?.click();
+    host.querySelector<HTMLButtonElement>('[data-tab="home"]')?.click();
+    expect(host.querySelector("[data-scribeva-content] p")?.textContent).toBe("Animated copy");
+    expect(host.querySelector("[data-scribeva-content] p")?.className).toBe("");
+    host.querySelector<HTMLButtonElement>('[data-command="animation:clear"]')?.click();
+    expect(host.querySelector("[data-scribeva-content] p")?.className).toBe("");
   });
 
   it("shows page-break markers by default and lets View hide them", () => {
@@ -307,6 +354,9 @@ describe("Scribeva public editor API", () => {
     const accent = host.querySelector<HTMLInputElement>("[data-accent-color]")!;
     accent.value = "#df5b3f";
     accent.dispatchEvent(new Event("change", { bubbles: true }));
+    const secondary = host.querySelector<HTMLInputElement>("[data-secondary-color]")!;
+    secondary.value = "#2878a8";
+    secondary.dispatchEvent(new Event("change", { bubbles: true }));
 
     host.querySelector<HTMLButtonElement>('[data-command="view:print"]')?.click();
     expect(open).toHaveBeenCalledWith("about:blank", "_blank");
@@ -319,6 +369,7 @@ describe("Scribeva public editor API", () => {
       "Print-ready document",
     );
     expect(printDocument.querySelector("style")?.textContent).toContain("#df5b3f");
+    expect(printDocument.querySelector("style")?.textContent).toContain("#2878a8");
     expect(document.body.classList.contains("scribeva-printing")).toBe(false);
     expect(document.querySelector(".scribeva-print-portal")).toBeNull();
 

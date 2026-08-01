@@ -35,6 +35,20 @@ interface DocumentTemplate {
   html: string;
 }
 
+type AnimationEffect =
+  | "fade-up" | "fade-down" | "fade-left" | "fade-right"
+  | "zoom-in" | "zoom-out" | "blur-in" | "bounce" | "shake"
+  | "float" | "type" | "underline" | "highlight";
+
+interface TextAnimation {
+  path: number[];
+  effect: AnimationEffect;
+  duration: number;
+  delay: number;
+  intensity: number;
+  loop: boolean;
+}
+
 const EMOJI = [
   "😀",
   "😃",
@@ -212,6 +226,7 @@ export class EditorShell implements ScribevaEditor {
   #pointerColumnDrag: { table: HTMLTableElement; from: number } | null = null;
   #selectedTemplate: TemplateId = "executive";
   #savedRange: Range | null = null;
+  readonly #animations: TextAnimation[] = [];
 
   constructor(host: HTMLElement, options: EditorOptions = {}) {
     if (!(host instanceof HTMLElement)) {
@@ -264,6 +279,8 @@ export class EditorShell implements ScribevaEditor {
     if (options.initialJSON) this.#engine.setJSON(options.initialJSON);
     this.#engine.setReadOnly(options.readOnly ?? false);
     this.#engine.onChange((change) => {
+      this.#readAnimationsFromDOM();
+      this.#refreshAnimations();
       this.#refreshTableInteractions();
       this.#updateStatus();
       options.onChange?.(change);
@@ -372,6 +389,7 @@ export class EditorShell implements ScribevaEditor {
         <button role="tab" aria-selected="false" data-tab="insert">${l.tabs.insert}</button>
         <button role="tab" aria-selected="false" data-tab="templates">${l.tabs.templates}</button>
         <button role="tab" aria-selected="false" data-tab="view">${l.tabs.view}</button>
+        <button role="tab" aria-selected="false" data-tab="animation">${l.tabs.animation}</button>
         <button role="tab" aria-selected="false" data-tab="html">${l.tabs.html}</button>
       </nav>
 
@@ -388,6 +406,9 @@ export class EditorShell implements ScribevaEditor {
       </div>
       <div class="scribeva__ribbon" data-panel="view" hidden>
         ${this.#viewGroup()}
+      </div>
+      <div class="scribeva__ribbon" data-panel="animation" hidden>
+        ${this.#animationGroup()}
       </div>
       <div class="scribeva__ribbon scribeva__ribbon--source" data-panel="html" hidden>
         ${this.#sourceGroup()}
@@ -679,6 +700,15 @@ export class EditorShell implements ScribevaEditor {
             <button type="button" data-accent-preset="#2e8b68" aria-label="Forest"></button>
             <button type="button" data-accent-preset="#b47b23" aria-label="Amber"></button>
           </label>
+          <label class="scribeva__accent-picker scribeva__secondary-picker">
+            <span>${l.chrome.secondaryColor}</span>
+            <input type="color" data-secondary-color value="#2e8b68" aria-label="${l.chrome.secondaryValue}">
+            <output data-secondary-value>#2E8B68</output>
+            <button type="button" data-secondary-preset="#2e8b68" aria-label="Forest"></button>
+            <button type="button" data-secondary-preset="#2878a8" aria-label="Ocean"></button>
+            <button type="button" data-secondary-preset="#9b4d9b" aria-label="Plum"></button>
+            <button type="button" data-secondary-preset="#b47b23" aria-label="Amber"></button>
+          </label>
           <select data-theme-select aria-label="${l.chrome.theme}" hidden>
             <option value="light">${l.theme.light}</option>
             <option value="dark">${l.theme.dark}</option>
@@ -797,6 +827,48 @@ export class EditorShell implements ScribevaEditor {
     </section>`;
   }
 
+  #animationGroup(): string {
+    const l = this.#locale;
+    return `<section class="scribeva__group scribeva__animation-group">
+      <div class="scribeva__animation-controls">
+        <span class="scribeva__animation-hint">${l.chrome.animationHint}</span>
+        <label>${l.chrome.animationEffect}
+          <select data-animation-effect aria-label="${l.chrome.animationEffect}">
+            <option value="fade-up">${l.chrome.animationFadeUp}</option>
+            <option value="fade-down">${l.chrome.animationFadeDown}</option>
+            <option value="fade-left">${l.chrome.animationFadeLeft}</option>
+            <option value="fade-right">${l.chrome.animationFadeRight}</option>
+            <option value="zoom-in">${l.chrome.animationZoomIn}</option>
+            <option value="zoom-out">${l.chrome.animationZoomOut}</option>
+            <option value="blur-in">${l.chrome.animationBlurIn}</option>
+            <option value="bounce">${l.chrome.animationBounce}</option>
+            <option value="shake">${l.chrome.animationShake}</option>
+            <option value="float">${l.chrome.animationFloat}</option>
+            <option value="type">${l.chrome.animationType}</option>
+            <option value="underline">${l.chrome.animationUnderline}</option>
+            <option value="highlight">${l.chrome.animationHighlight}</option>
+          </select>
+        </label>
+        <label>${l.chrome.animationDuration}
+          <span class="scribeva__animation-value"><select data-animation-duration aria-label="${l.chrome.animationDuration}"><option value="400">400 ms</option><option value="700" selected>700 ms</option><option value="1000">1000 ms</option><option value="1500">1500 ms</option><option value="custom">${l.chrome.customValue}</option></select><input type="number" min="100" max="3000" step="50" value="700" data-animation-duration-input hidden aria-label="${l.chrome.animationDuration} · ${l.chrome.customValue}"><b>ms</b></span>
+        </label>
+        <label>${l.chrome.animationDelay}
+          <span class="scribeva__animation-value"><select data-animation-delay aria-label="${l.chrome.animationDelay}"><option value="0" selected>0 ms</option><option value="150">150 ms</option><option value="300">300 ms</option><option value="500">500 ms</option><option value="custom">${l.chrome.customValue}</option></select><input type="number" min="0" max="2000" step="50" value="0" data-animation-delay-input hidden aria-label="${l.chrome.animationDelay} · ${l.chrome.customValue}"><b>ms</b></span>
+        </label>
+        <label>${l.chrome.animationIntensity}
+          <span class="scribeva__animation-value"><select data-animation-intensity aria-label="${l.chrome.animationIntensity}"><option value="50">50%</option><option value="75">75%</option><option value="100" selected>100%</option><option value="125">125%</option><option value="150">150%</option><option value="custom">${l.chrome.customValue}</option></select><input type="number" min="25" max="200" step="5" value="100" data-animation-intensity-input hidden aria-label="${l.chrome.animationIntensity} · ${l.chrome.customValue}"><b>%</b></span>
+        </label>
+        <label class="scribeva__animation-loop"><input type="checkbox" data-animation-loop> ${l.chrome.animationLoop}</label>
+        <div class="scribeva__animation-actions">
+          ${this.#button("animation:apply", l.chrome.animationApply, "sparkles")}
+          ${this.#button("animation:clear", l.chrome.animationClear, "close")}
+        </div>
+      </div>
+      <div class="scribeva__animation-objects" data-animation-objects aria-live="polite"><small>${l.chrome.animationEmpty}</small></div>
+      <h3>${l.groups.animation}</h3>
+    </section>`;
+  }
+
   #sourceGroup(): string {
     const l = this.#locale;
     return `<section class="scribeva__group scribeva__group--source">
@@ -836,7 +908,10 @@ export class EditorShell implements ScribevaEditor {
       (event) => {
         const target = event.target as Element;
         const tab = target.closest<HTMLButtonElement>("[data-tab]");
-        if (tab) this.#activateTab(tab.dataset.tab ?? "home");
+        if (tab) {
+          if (tab.dataset.tab === "animation") this.#captureSelection();
+          this.#activateTab(tab.dataset.tab ?? "home");
+        }
 
         const button = target.closest<HTMLButtonElement>("[data-command]");
         if (button?.dataset.command) this.#handleCommand(button.dataset.command);
@@ -846,11 +921,23 @@ export class EditorShell implements ScribevaEditor {
           this.#selectTemplate(templateCard.dataset.templateId as TemplateId);
         }
         if (target.closest("[data-apply-template]")) this.#applyTemplate();
+        const animationRemove = target.closest<HTMLButtonElement>("[data-animation-remove]");
+        if (animationRemove) {
+          const index = Number(animationRemove.dataset.animationRemove);
+          if (Number.isInteger(index)) {
+            this.#animations.splice(index, 1);
+            this.#refreshAnimations();
+          }
+        }
 
         if (target.closest('[data-action="theme"]')) this.#toggleTheme();
         const accentPreset = target.closest<HTMLButtonElement>("[data-accent-preset]");
         if (accentPreset?.dataset.accentPreset) {
           this.#setAccentColor(accentPreset.dataset.accentPreset);
+        }
+        const secondaryPreset = target.closest<HTMLButtonElement>("[data-secondary-preset]");
+        if (secondaryPreset?.dataset.secondaryPreset) {
+          this.#setSecondaryColor(secondaryPreset.dataset.secondaryPreset);
         }
         const themeChoice = target.closest<HTMLButtonElement>("[data-theme-choice]");
         if (themeChoice?.dataset.themeChoice) {
@@ -885,13 +972,24 @@ export class EditorShell implements ScribevaEditor {
       "change",
       (event) => {
         const target = event.target as HTMLInputElement | HTMLSelectElement;
-        if (target.matches("[data-sticky-toolbar]")) {
+        if (target.matches("[data-animation-duration], [data-animation-delay], [data-animation-intensity]")) {
+          const inputName = target.dataset.animationDuration !== undefined
+            ? "[data-animation-duration-input]"
+            : target.dataset.animationDelay !== undefined
+              ? "[data-animation-delay-input]"
+              : "[data-animation-intensity-input]";
+          const input = this.#root.querySelector<HTMLInputElement>(inputName);
+          if (input) input.hidden = target.value !== "custom";
+          if (target.value === "custom") input?.focus();
+        } else if (target.matches("[data-sticky-toolbar]")) {
           this.#root.classList.toggle(
             "is-toolbar-sticky",
             (target as HTMLInputElement).checked,
           );
         } else if (target.matches("[data-accent-color]")) {
           this.#setAccentColor((target as HTMLInputElement).value);
+        } else if (target.matches("[data-secondary-color]")) {
+          this.#setSecondaryColor((target as HTMLInputElement).value);
         } else if (target.matches("[data-sticky-offset]")) {
           const input = target as HTMLInputElement;
           const value = Math.min(
@@ -1285,7 +1383,124 @@ export class EditorShell implements ScribevaEditor {
     if (sourceWorkspace) sourceWorkspace.hidden = name !== "html";
     if (pageWrap) pageWrap.hidden = name === "html";
     this.#root.classList.toggle("is-source-mode", name === "html");
+    const ribbon = this.#root.querySelector<HTMLElement>(
+      `.scribeva__ribbon[data-panel="${name}"]`,
+    );
+    if (ribbon && name !== "html") {
+      ribbon.classList.remove("is-panel-entering");
+      ribbon.classList.add("is-panel-entering");
+    }
     if (name === "html") queueMicrotask(() => this.#source.focus());
+  }
+
+  #animationTarget(): HTMLElement | null {
+    if (!this.#savedRange || !this.#content.contains(this.#savedRange.startContainer)) {
+      return null;
+    }
+    const node = this.#savedRange.startContainer;
+    const element = node.nodeType === Node.ELEMENT_NODE
+      ? node as Element
+      : node.parentElement;
+    return element?.closest<HTMLElement>(
+      "p,h1,h2,h3,h4,h5,h6,blockquote,li,td,th,figcaption,span",
+    ) ?? this.#content;
+  }
+
+  #applyAnimation(): void {
+    const target = this.#animationTarget();
+    if (!target || target === this.#content) return;
+    const effect = (this.#root.querySelector<HTMLSelectElement>("[data-animation-effect]")?.value ?? "fade-up") as AnimationEffect;
+    const animationValue = (select: string, input: string, fallback: number): number => {
+      const selected = this.#root.querySelector<HTMLSelectElement>(select)?.value ?? String(fallback);
+      return Number(selected === "custom" ? this.#root.querySelector<HTMLInputElement>(input)?.value : selected) || fallback;
+    };
+    const duration = animationValue("[data-animation-duration]", "[data-animation-duration-input]", 700);
+    const delay = animationValue("[data-animation-delay]", "[data-animation-delay-input]", 0);
+    const intensity = animationValue("[data-animation-intensity]", "[data-animation-intensity-input]", 100);
+    const loop = this.#root.querySelector<HTMLInputElement>("[data-animation-loop]")?.checked ?? false;
+    const path = this.#animationPath(target);
+    const existing = this.#animations.find((item) => item.path.join(".") === path.join("."));
+    const config: TextAnimation = { path, effect, duration, delay, intensity, loop };
+    if (existing) Object.assign(existing, config);
+    else this.#animations.push(config);
+    this.#refreshAnimations();
+    this.#engine.commit("command");
+  }
+
+  #clearAnimation(): void {
+    this.#animations.length = 0;
+    this.#refreshAnimations();
+    this.#engine.commit("command");
+    this.#animations.length = 0;
+    this.#refreshAnimations();
+  }
+
+  #animationPath(element: HTMLElement): number[] {
+    const path: number[] = [];
+    let current: Node | null = element;
+    while (current && current !== this.#content) {
+      const parent: Node | null = current.parentNode;
+      if (!parent) break;
+      path.unshift(Array.prototype.indexOf.call(parent.childNodes, current));
+      current = parent;
+    }
+    return path;
+  }
+
+  #animationElement(path: number[]): HTMLElement | null {
+    let current: Node = this.#content;
+    for (const index of path) {
+      const child = current.childNodes[index];
+      if (!child) return null;
+      current = child;
+    }
+    return current instanceof HTMLElement ? current : null;
+  }
+
+  #refreshAnimations(): void {
+    this.#content.querySelectorAll<HTMLElement>("[class*='scribeva-motion-']").forEach((element) => {
+      element.className = Array.from(element.classList).filter((name) => !name.startsWith("scribeva-motion-")).join(" ");
+      element.style.removeProperty("--scribeva-motion-duration");
+      element.style.removeProperty("--scribeva-motion-delay");
+      element.style.removeProperty("--scribeva-motion-intensity");
+    });
+    this.#animations.forEach((config) => {
+      const element = this.#animationElement(config.path);
+      if (!element) return;
+      element.classList.add(`scribeva-motion-${config.effect}`);
+      element.classList.add(`scribeva-motion-duration-${config.duration}`);
+      element.classList.add(`scribeva-motion-delay-${config.delay}`);
+      element.classList.add(`scribeva-motion-intensity-${config.intensity}`);
+      if (config.loop) element.classList.add("scribeva-motion-loop");
+      element.style.setProperty("--scribeva-motion-duration", `${Math.min(3000, Math.max(100, config.duration))}ms`);
+      element.style.setProperty("--scribeva-motion-delay", `${Math.min(2000, Math.max(0, config.delay))}ms`);
+      element.style.setProperty("--scribeva-motion-intensity", `${Math.min(150, Math.max(50, config.intensity)) / 100}`);
+      element.classList.toggle("scribeva-motion-loop", config.loop);
+    });
+    const list = this.#root.querySelector<HTMLElement>("[data-animation-objects]");
+    if (!list) return;
+    list.innerHTML = this.#animations.length
+      ? this.#animations.map((config, index) => `<span class="scribeva__animation-chip">${config.effect} · ${config.duration}ms${config.loop ? " · ∞" : ""}<button type="button" data-animation-remove="${index}" aria-label="${this.#locale.chrome.animationRemove}">×</button></span>`).join("")
+      : `<small>${this.#locale.chrome.animationEmpty}</small>`;
+  }
+
+  #readAnimationsFromDOM(): void {
+    const discovered: TextAnimation[] = [];
+    this.#content.querySelectorAll<HTMLElement>("[class*='scribeva-motion-']").forEach((element) => {
+      const classes = Array.from(element.classList);
+      const effect = classes.find((name) => /^scribeva-motion-(fade|zoom|blur|bounce|shake|float|type|underline|highlight)/u.test(name))?.replace("scribeva-motion-", "") as AnimationEffect | undefined;
+      if (!effect) return;
+      const numberClass = (prefix: string, fallback: number): number => Number(classes.find((name) => name.startsWith(prefix))?.slice(prefix.length)) || fallback;
+      discovered.push({
+        path: this.#animationPath(element),
+        effect,
+        duration: numberClass("scribeva-motion-duration-", 700),
+        delay: numberClass("scribeva-motion-delay-", 0),
+        intensity: numberClass("scribeva-motion-intensity-", 100),
+        loop: classes.includes("scribeva-motion-loop"),
+      });
+    });
+    this.#animations.splice(0, this.#animations.length, ...discovered);
   }
 
   #handleCommand(command: string): void {
@@ -1297,6 +1512,10 @@ export class EditorShell implements ScribevaEditor {
       this.#root.classList.toggle("is-focus-mode");
     } else if (command === "view:print") {
       this.#printDocument();
+    } else if (command === "animation:apply") {
+      this.#applyAnimation();
+    } else if (command === "animation:clear") {
+      this.#clearAnimation();
     } else if (command === "imageUpload") {
       this.#root.querySelector<HTMLInputElement>("[data-image-upload]")?.click();
     } else if (command === "source:apply") {
@@ -1348,6 +1567,9 @@ export class EditorShell implements ScribevaEditor {
     const accent = printColor("--scribeva-accent", "#5b5bd6");
     const accentStrong = printColor("--scribeva-accent-strong", accent);
     const accentSoft = printColor("--scribeva-accent-soft", "#eeeeff");
+    const secondary = printColor("--scribeva-secondary", "#2e8b68");
+    const secondaryStrong = printColor("--scribeva-secondary-strong", secondary);
+    const secondarySoft = printColor("--scribeva-secondary-soft", "#e5f3ed");
     const surface = printColor("--scribeva-surface", "#ffffff");
     const background = printColor("--scribeva-bg", "#eef1f6");
     const text = printColor("--scribeva-text", "#172033");
@@ -1367,15 +1589,15 @@ export class EditorShell implements ScribevaEditor {
       * { box-sizing: border-box; }
       body { margin: 0; }
       .print-toolbar { position: sticky; z-index: 2; top: 0; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid ${border}; background: ${surface}; box-shadow: 0 4px 18px rgb(23 32 51 / 10%); }
-      .print-toolbar strong { margin-right: auto; }
+      .print-toolbar strong { margin-right: auto; color: ${secondaryStrong}; }
       .print-toolbar small { color: ${muted}; }
       button { min-height: 38px; padding: 0 16px; border: 1px solid ${accentStrong}; border-radius: 6px; background: ${accent}; color: white; font: inherit; cursor: pointer; }
       button.secondary { border-color: ${border}; background: ${surface}; color: ${text}; }
       main { width: min(816px, calc(100% - 32px)); min-height: 1056px; margin: 32px auto; padding: 72px 76px; background: ${surface}; box-shadow: 0 18px 45px rgb(27 39 65 / 14%); }
-      h1 { font-size: 2.25em; line-height: 1.15; } h2 { margin-top: 1.6em; }
+      h1 { font-size: 2.25em; line-height: 1.15; } h2 { margin-top: 1.6em; color: ${secondaryStrong}; }
       p, li, td, th { line-height: 1.65; }
-      blockquote { margin: 1.5em 0; padding: .25em 1em; border-left: 4px solid ${accent}; color: ${muted}; }
-      table { width: 100%; border-collapse: collapse; } th, td { padding: 8px 10px; border: 1px solid ${border}; text-align: left; }
+      blockquote { margin: 1.5em 0; padding: .25em 1em; border-left: 4px solid ${secondary}; background: ${accentSoft}; color: ${muted}; }
+      table { width: 100%; border-collapse: collapse; } th, td { padding: 8px 10px; border: 1px solid ${border}; text-align: left; } th { background: ${secondarySoft}; color: ${secondaryStrong}; }
       img { max-width: 100%; height: auto; }
       .scribeva-columns { column-rule: 1px solid ${border}; }
       .scribeva-page-break { height: 14px; margin: 2.4em -24px; border: 0; border-top: 1px dashed ${border}; border-bottom: 1px dashed ${border}; background: ${accentSoft}; }
@@ -1572,6 +1794,7 @@ export class EditorShell implements ScribevaEditor {
       },
     );
     this.#syncAccentControl();
+    this.#syncSecondaryControl();
   }
 
   #setAccentColor(value: string): void {
@@ -1606,6 +1829,38 @@ export class EditorShell implements ScribevaEditor {
           button.dataset.accentPreset?.toLowerCase() === candidate.toLowerCase(),
         );
       },
+    );
+  }
+
+  #setSecondaryColor(value: string): void {
+    const normalized = value.trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/u.test(normalized)) return;
+    this.#root.style.setProperty("--scribeva-secondary", normalized);
+    this.#root.style.setProperty(
+      "--scribeva-secondary-strong",
+      `color-mix(in srgb, ${normalized} 78%, #000)`,
+    );
+    this.#root.style.setProperty(
+      "--scribeva-secondary-soft",
+      `color-mix(in srgb, ${normalized} 13%, var(--scribeva-surface))`,
+    );
+    this.#syncSecondaryControl(normalized);
+  }
+
+  #syncSecondaryControl(value?: string): void {
+    const input = this.#root.querySelector<HTMLInputElement>("[data-secondary-color]");
+    const output = this.#root.querySelector<HTMLOutputElement>("[data-secondary-value]");
+    const computed = getComputedStyle(this.#root)
+      .getPropertyValue("--scribeva-secondary")
+      .trim();
+    const candidate = value ?? (computed.startsWith("#") ? computed : "#2e8b68");
+    if (input && /^#[0-9a-f]{6}$/u.test(candidate)) input.value = candidate;
+    if (output) output.value = candidate.toUpperCase();
+    this.#root.querySelectorAll<HTMLButtonElement>("[data-secondary-preset]").forEach(
+      (button) => button.classList.toggle(
+        "is-selected",
+        button.dataset.secondaryPreset?.toLowerCase() === candidate.toLowerCase(),
+      ),
     );
   }
 

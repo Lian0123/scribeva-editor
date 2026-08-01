@@ -29,6 +29,31 @@ test("switches ribbon tabs and theme", async ({ page }) => {
   await page.locator('[data-theme-choice="dark"]').click();
 
   await expect(root).toHaveAttribute("data-theme", "dark");
+  await page.locator('[data-secondary-color]').fill("#2878a8");
+  await expect.poll(() => root.evaluate((element) => element.style.getPropertyValue("--scribeva-secondary"))).toBe("#2878a8");
+});
+
+test("applies a text animation from the dedicated Animation tab", async ({ page }) => {
+  await page.goto("/");
+  const paragraph = page.locator('[data-scribeva-content] p').first();
+  await paragraph.click();
+  await page.getByRole("tab", { name: "動畫" }).click();
+  await expect(page.locator('[data-panel="animation"]')).toBeVisible();
+  await page.locator('[data-animation-effect]').selectOption("bounce");
+  await page.locator('[data-command="animation:apply"]').click();
+  await expect(paragraph).toHaveClass(/scribeva-motion-bounce/);
+  await page.locator('[data-command="animation:clear"]').click();
+  await expect(paragraph).not.toHaveClass(/scribeva-motion-/);
+});
+
+test("keeps ribbon groups aligned and animates tab transitions", async ({ page }) => {
+  await page.goto("/");
+  const heights = await page.locator('.scribeva__ribbon:not([hidden]) > .scribeva__group').evaluateAll(
+    (groups) => groups.map((group) => Math.round(group.getBoundingClientRect().height)),
+  );
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+  await page.getByRole("tab", { name: "檢視" }).click();
+  await expect(page.locator('.scribeva__ribbon[data-panel="view"]')).toHaveClass(/is-panel-entering/);
 });
 
 test("supports touch-sized Ribbon controls and stacked mobile panels", async ({

@@ -59,3 +59,9 @@
 - Mobile-first Ribbon and template layouts with 44px touch targets, stacked
   View sections, safe-area dialog spacing, controlled custom accent colors, and
   print styles that inherit the active editor palette.
+- Secondary tone controls with presets and print-token propagation, equal-height
+  Ribbon groups, and reduced-motion-safe native CSS UI animations scoped away
+  from the print document.
+- A dedicated Animation tab between View and Edit HTML with selectable text
+  effects, custom duration/delay/intensity/loop controls, inspectable
+  `scribeva-motion-*` class names, and print-safe motion styling.

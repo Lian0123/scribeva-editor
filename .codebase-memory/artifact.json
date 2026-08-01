@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
     "commit": "155f83057082c63b4083c3e50308ed931e7a6ef4",
-    "indexed_at": "2026-08-01T15:48:26Z",
-    "project": "website-html-editor",
-    "nodes": 618,
-    "edges": 1467,
-    "original_size": 3145728,
-    "compressed_size": 564045,
+    "indexed_at": "2026-08-01T16:48:08Z",
+    "project": "Users-lianyongli-website-html-editor",
+    "nodes": 363,
+    "edges": 855,
+    "original_size": 2162688,
+    "compressed_size": 108404,
     "compression_level": 3
 }

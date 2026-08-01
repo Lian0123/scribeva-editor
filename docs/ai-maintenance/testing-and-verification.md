@@ -42,9 +42,11 @@ and localized controls are created there, Print/Close work, and the host page
 never receives print-only classes or portal markup.
 
 Responsive specifications run at a 390px viewport and assert no document-level
-horizontal overflow, touch-sized theme controls, stacked View sections, and a
-mobile-safe template action area. Theme tests cover visible mode cards, custom
-accent synchronization, and print-style token propagation.
+horizontal overflow, touch-sized theme controls, stacked View sections, aligned
+Ribbon groups, native CSS tab motion, and a mobile-safe template action area.
+Theme tests cover visible mode cards, custom accent/secondary synchronization,
+print-style token propagation, and the dedicated Animation tab applying and
+clearing classname-based motion while preserving document text across HTML mode.
 
 Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.

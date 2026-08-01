@@ -3,6 +3,9 @@
     --scribeva-accent: #5b5bd6;
     --scribeva-accent-strong: #4747c4;
     --scribeva-accent-soft: #eeeeff;
+    --scribeva-secondary: #2e8b68;
+    --scribeva-secondary-strong: #256f54;
+    --scribeva-secondary-soft: #e5f3ed;
     --scribeva-bg: #eef1f6;
     --scribeva-surface: #ffffff;
     --scribeva-surface-raised: #ffffff;
@@ -62,6 +65,9 @@
     --scribeva-accent: #8e8ef0;
     --scribeva-accent-strong: #a4a4f5;
     --scribeva-accent-soft: #29294e;
+    --scribeva-secondary: #70c39b;
+    --scribeva-secondary-strong: #9de0bd;
+    --scribeva-secondary-soft: #233f35;
     --scribeva-bg: #121722;
     --scribeva-surface: #1b2230;
     --scribeva-surface-raised: #222b3a;
@@ -81,6 +87,9 @@
       --scribeva-accent: #8e8ef0;
       --scribeva-accent-strong: #a4a4f5;
       --scribeva-accent-soft: #29294e;
+      --scribeva-secondary: #70c39b;
+      --scribeva-secondary-strong: #9de0bd;
+      --scribeva-secondary-soft: #233f35;
       --scribeva-bg: #121722;
       --scribeva-surface: #1b2230;
       --scribeva-surface-raised: #222b3a;
@@ -274,6 +283,7 @@
 
   .scribeva__ribbon {
     display: flex;
+    align-items: stretch;
     min-height: 112px;
     overflow-x: auto;
     border-bottom: 1px solid var(--scribeva-border);
@@ -289,6 +299,7 @@
     display: grid;
     align-content: space-between;
     min-width: max-content;
+    align-self: stretch;
     padding: 9px 11px 5px;
     border-right: 1px solid var(--scribeva-border);
   }
@@ -490,7 +501,7 @@
     position: absolute;
     inset: 0;
     width: 100%;
-    height: 100%;
+    align-self: stretch;
     opacity: 0;
   }
 
@@ -602,6 +613,7 @@
     gap: 6px 8px;
     align-content: center;
     min-width: 230px;
+    height: 100%;
     padding: 9px 12px;
     border-right: 1px solid var(--scribeva-border);
     background: linear-gradient(180deg, var(--scribeva-surface), var(--scribeva-surface-muted));
@@ -613,11 +625,158 @@
 
   .scribeva__view-section-title {
     grid-column: 1 / -1;
-    color: var(--scribeva-accent-strong);
+    color: var(--scribeva-secondary-strong);
     font-size: 9px;
     font-weight: 750;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .scribeva__animation-group {
+    min-width: min(100%, 720px);
+  }
+
+  .scribeva__animation-controls {
+    display: flex;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .scribeva__animation-controls label {
+    display: grid;
+    gap: 3px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+  }
+
+  .scribeva__animation-controls select {
+    min-height: 31px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface);
+    color: var(--scribeva-text);
+  }
+
+  .scribeva__animation-value {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .scribeva__animation-value input {
+    width: 70px;
+    min-height: 31px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface);
+    color: var(--scribeva-text);
+  }
+
+  .scribeva__animation-value b {
+    color: var(--scribeva-text-muted);
+    font-size: 9px;
+  }
+
+  .scribeva__animation-hint {
+    max-width: 210px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .scribeva__animation-actions {
+    display: flex;
+    gap: 5px;
+  }
+
+  .scribeva__animation-loop {
+    align-self: end;
+    display: flex !important;
+    grid-template-columns: auto auto;
+    align-items: center;
+    height: 31px;
+    margin-bottom: 0;
+    padding: 0 4px;
+    border: 1px solid var(--scribeva-border);
+    border-radius: var(--scribeva-control-radius);
+    background: var(--scribeva-surface);
+  }
+
+  .scribeva__animation-objects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 7px;
+    color: var(--scribeva-text-muted);
+    font-size: 10px;
+  }
+
+  .scribeva__animation-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 7px;
+    border: 1px solid var(--scribeva-secondary);
+    border-radius: 999px;
+    background: var(--scribeva-secondary-soft);
+    color: var(--scribeva-secondary-strong);
+  }
+
+  .scribeva__animation-chip button {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .scribeva__page [class*="scribeva-motion-"] {
+      animation-duration: var(--scribeva-motion-duration, 700ms);
+      animation-delay: var(--scribeva-motion-delay, 0ms);
+      animation-fill-mode: both;
+      animation-timing-function: cubic-bezier(.22, .75, .24, 1);
+    }
+    .scribeva__page .scribeva-motion-fade-up { animation-name: scribeva-text-fade-up; }
+    .scribeva__page .scribeva-motion-fade-down { animation-name: scribeva-text-fade-down; }
+    .scribeva__page .scribeva-motion-fade-left { animation-name: scribeva-text-fade-left; }
+    .scribeva__page .scribeva-motion-fade-right { animation-name: scribeva-text-fade-right; }
+    .scribeva__page .scribeva-motion-zoom-in { animation-name: scribeva-text-zoom-in; }
+    .scribeva__page .scribeva-motion-zoom-out { animation-name: scribeva-text-zoom-out; }
+    .scribeva__page .scribeva-motion-blur-in { animation-name: scribeva-text-blur-in; }
+    .scribeva__page .scribeva-motion-bounce { animation-name: scribeva-text-bounce; }
+    .scribeva__page .scribeva-motion-shake { animation-name: scribeva-text-shake; }
+    .scribeva__page .scribeva-motion-float { animation-name: scribeva-text-float; }
+    .scribeva__page .scribeva-motion-type { animation-name: scribeva-text-type; }
+    .scribeva__page .scribeva-motion-underline { animation-name: scribeva-text-underline; }
+    .scribeva__page .scribeva-motion-highlight { animation-name: scribeva-text-highlight; }
+    .scribeva__page .scribeva-motion-loop { animation-iteration-count: infinite; }
+    @keyframes scribeva-text-fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scribeva-text-rise {
+      from { opacity: 0; transform: scale(.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes scribeva-text-fade-down { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scribeva-text-fade-left { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes scribeva-text-fade-right { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes scribeva-text-zoom-in { from { opacity: 0; transform: scale(calc(1 - .12 * var(--scribeva-motion-intensity, 1))); } to { opacity: 1; transform: scale(1); } }
+    @keyframes scribeva-text-zoom-out { from { opacity: 0; transform: scale(calc(1 + .12 * var(--scribeva-motion-intensity, 1))); } to { opacity: 1; transform: scale(1); } }
+    @keyframes scribeva-text-blur-in { from { opacity: 0; filter: blur(calc(8px * var(--scribeva-motion-intensity, 1))); } to { opacity: 1; filter: blur(0); } }
+    @keyframes scribeva-text-bounce { 0%,100% { transform: translateY(0); } 45% { transform: translateY(calc(-12px * var(--scribeva-motion-intensity, 1))); } }
+    @keyframes scribeva-text-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    @keyframes scribeva-text-float { from { opacity: .5; transform: translateY(8px); } to { opacity: 1; transform: translateY(-4px); } }
+    @keyframes scribeva-text-underline { from { text-decoration-color: transparent; text-decoration-thickness: 0; } to { text-decoration-color: currentColor; text-decoration-thickness: 2px; } }
+    @keyframes scribeva-text-highlight { from { background-color: transparent; } to { background-color: var(--scribeva-secondary-soft); } }
+    @keyframes scribeva-text-type {
+      from { opacity: 0; clip-path: inset(0 100% 0 0); }
+      to { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
   }
 
   .scribeva__view-primary-actions,
@@ -727,11 +886,36 @@
   .scribeva__accent-picker button[data-accent-preset="#df5b3f"] { --accent-preset: #df5b3f; }
   .scribeva__accent-picker button[data-accent-preset="#2e8b68"] { --accent-preset: #2e8b68; }
   .scribeva__accent-picker button[data-accent-preset="#b47b23"] { --accent-preset: #b47b23; }
+  .scribeva__secondary-picker button[data-secondary-preset="#2e8b68"] { --accent-preset: #2e8b68; }
+  .scribeva__secondary-picker button[data-secondary-preset="#2878a8"] { --accent-preset: #2878a8; }
+  .scribeva__secondary-picker button[data-secondary-preset="#9b4d9b"] { --accent-preset: #9b4d9b; }
+  .scribeva__secondary-picker button[data-secondary-preset="#b47b23"] { --accent-preset: #b47b23; }
 
   .scribeva__accent-picker button:hover,
   .scribeva__accent-picker button.is-selected {
     transform: scale(1.16);
     box-shadow: 0 0 0 2px var(--scribeva-accent);
+  }
+
+  .scribeva__secondary-picker button:hover,
+  .scribeva__secondary-picker button.is-selected {
+    box-shadow: 0 0 0 2px var(--scribeva-secondary);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .scribeva__ribbon.is-panel-entering {
+      animation: scribeva-panel-in 180ms ease-out both;
+    }
+    .scribeva__template-card {
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+    .scribeva__template-card:hover {
+      transform: translateY(-2px);
+    }
+    @keyframes scribeva-panel-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   }
 
   .scribeva__view-section .scribeva__tool {
@@ -1072,6 +1256,7 @@
     margin: 1.5em 0 0.55em;
     font-size: 1.65em;
     letter-spacing: -0.02em;
+    color: var(--scribeva-secondary-strong);
   }
 
   .scribeva__page h3 {
@@ -1086,8 +1271,9 @@
   .scribeva__page blockquote {
     margin: 1.2em 0;
     padding: 0.6em 1.1em;
-    border-left: 3px solid var(--scribeva-accent);
+    border-left: 3px solid var(--scribeva-secondary);
     background: var(--scribeva-accent-soft);
+    box-shadow: inset 6px 0 0 color-mix(in srgb, var(--scribeva-secondary) 45%, transparent);
     color: var(--scribeva-text-muted);
   }
 
@@ -1652,6 +1838,7 @@
       min-width: 100%;
       border-right: 0;
       border-bottom: 1px solid var(--scribeva-border);
+      height: auto;
     }
 
     .scribeva__view-section:first-child {
@@ -1676,6 +1863,11 @@
 
     .scribeva__accent-picker {
       flex-wrap: wrap;
+    }
+
+    .scribeva__group,
+    .scribeva__view-section {
+      height: auto;
     }
 
     .scribeva__template-group {

@@ -57,11 +57,19 @@ print-ready document using DOM APIs. The source editor page is never mutated or
 restyled. The print tab contains only sanitized editor HTML, dedicated screen
 and print CSS, explicit Print and Close controls, and real page-break behavior.
 
+The Animation tab sits between View and Edit HTML. It applies native CSS effects
+to the selected text block in the live editor with duration, delay, intensity,
+and looping controls. Settings are encoded as `scribeva-motion-*` class names so
+the HTML editor can inspect and edit them; the print tab intentionally has no
+motion CSS, so these classes never animate or alter printed layout.
+
 The View document section exposes accessible theme cards plus a controlled
-accent-color picker and presets. The selected accent is applied through the
-same `--scribeva-` tokens used by editor surfaces, controls, focus states, and
-the print tab, so a green or custom theme cannot silently become blue at print
-time. Mobile layouts use 44px touch targets, horizontally scrollable tabs and
+accent-color and secondary-color pickers with presets. Both tones are applied
+through shared `--scribeva-` tokens used by editor surfaces, controls, focus
+states, and the print tab, so a custom theme cannot silently change at print
+time. Ribbon groups stretch to a common height on wide layouts, while native
+CSS hover/tab motion is disabled by reduced-motion preferences and is scoped to
+the editor UI (never the print document). Mobile layouts use 44px touch targets, horizontally scrollable tabs and
 ribbons where needed, stacked View sections, two-column template cards, a
 single-column template preview/action flow, safe-area-aware dialogs, and a
 fluid document canvas at phone widths.
