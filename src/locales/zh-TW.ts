@@ -141,6 +141,8 @@ export const zhTW: LocaleShape = {
     printReadyHint: "請先檢查獨立文件，再從此分頁執行列印。",
     documentViewHint: "選擇編輯文件時的觀看方式。",
     themeHint: "表面與對比",
+    accentColor: "強調色",
+    accentValue: "目前強調色",
     templatePreview: "模板預覽",
     templateReplaceHint: "套用後會取代目前文件，且可使用復原還原。",
     presets: "預設值",

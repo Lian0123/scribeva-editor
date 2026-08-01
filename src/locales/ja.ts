@@ -133,6 +133,8 @@ export const ja: typeof zhTW = {
     printReadyHint: "独立した文書を確認してから、このタブで印刷してください。",
     documentViewHint: "作業中の文書の見え方を選択します。",
     themeHint: "表面とコントラスト",
+    accentColor: "アクセントカラー",
+    accentValue: "選択中のアクセントカラー",
     templatePreview: "テンプレートプレビュー",
     templateReplaceHint: "適用すると現在の文書を置換しますが、元に戻せます。",
     presets: "プリセット",

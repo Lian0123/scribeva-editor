@@ -238,6 +238,11 @@ describe("Scribeva public editor API", () => {
     themeDark.click();
     expect(root.dataset.theme).toBe("dark");
     expect(themeDark.getAttribute("aria-checked")).toBe("true");
+    const accent = host.querySelector<HTMLInputElement>("[data-accent-color]")!;
+    accent.value = "#df5b3f";
+    accent.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.style.getPropertyValue("--scribeva-accent")).toBe("#df5b3f");
+    expect(host.querySelector("[data-accent-value]")?.textContent).toBe("#DF5B3F");
     expect(sticky.checked).toBe(false);
     sticky.checked = true;
     sticky.dispatchEvent(new Event("change", { bubbles: true }));
@@ -299,6 +304,9 @@ describe("Scribeva public editor API", () => {
       .mockReturnValue(popup as unknown as Window);
     const host = document.querySelector<HTMLElement>("#host")!;
     createEditor(host, { initialHTML: "<h1>Print me</h1>", locale: "en" });
+    const accent = host.querySelector<HTMLInputElement>("[data-accent-color]")!;
+    accent.value = "#df5b3f";
+    accent.dispatchEvent(new Event("change", { bubbles: true }));
 
     host.querySelector<HTMLButtonElement>('[data-command="view:print"]')?.click();
     expect(open).toHaveBeenCalledWith("about:blank", "_blank");
@@ -310,6 +318,7 @@ describe("Scribeva public editor API", () => {
     expect(printDocument.querySelector(".print-toolbar")?.textContent).toContain(
       "Print-ready document",
     );
+    expect(printDocument.querySelector("style")?.textContent).toContain("#df5b3f");
     expect(document.body.classList.contains("scribeva-printing")).toBe(false);
     expect(document.querySelector(".scribeva-print-portal")).toBeNull();
 

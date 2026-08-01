@@ -31,6 +31,36 @@ test("switches ribbon tabs and theme", async ({ page }) => {
   await expect(root).toHaveAttribute("data-theme", "dark");
 });
 
+test("supports touch-sized Ribbon controls and stacked mobile panels", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const root = page.locator(".scribeva");
+  const rootBox = await root.boundingBox();
+  if (!rootBox) throw new Error("Mobile editor is not visible.");
+  expect(rootBox.width).toBeLessThanOrEqual(390);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+  ).toBe(true);
+
+  await page.getByRole("tab", { name: "檢視" }).click();
+  await expect(page.locator(".scribeva__view-section")).toHaveCount(3);
+  await expect(page.locator('[data-theme-choice="dark"]')).toBeVisible();
+  await expect(page.locator('[data-theme-choice="dark"]')).toHaveCSS(
+    "min-height",
+    "40px",
+  );
+
+  await page.getByRole("tab", { name: "模板式樣" }).click();
+  await expect(page.locator("[data-template-id]")).toHaveCount(9);
+  const applyBox = await page
+    .locator(".scribeva__template-apply .scribeva__button")
+    .boundingBox();
+  if (!applyBox) throw new Error("Mobile template action is not visible.");
+  expect(applyBox.width).toBeLessThanOrEqual(390);
+});
+
 test("edits sanitized HTML source with code-editor affordances", async ({
   page,
 }) => {

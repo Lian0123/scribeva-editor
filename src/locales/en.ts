@@ -131,6 +131,8 @@ export const en = {
     printReadyHint: "Review the isolated document, then print from this page.",
     documentViewHint: "Choose how the document feels while you work.",
     themeHint: "Surface and contrast",
+    accentColor: "Accent color",
+    accentValue: "Selected accent color",
     templatePreview: "Template preview",
     templateReplaceHint: "Applying replaces the document and can be undone.",
     presets: "Presets",

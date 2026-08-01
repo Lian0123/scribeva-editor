@@ -670,6 +670,15 @@ export class EditorShell implements ScribevaEditor {
             <button type="button" class="scribeva__theme-card" data-theme-choice="dark" aria-checked="false"><i class="scribeva__theme-card-swatch is-dark"></i><b>${l.theme.dark}</b></button>
             <button type="button" class="scribeva__theme-card" data-theme-choice="system" aria-checked="false"><i class="scribeva__theme-card-swatch is-system"></i><b>${l.theme.system}</b></button>
           </div>
+          <label class="scribeva__accent-picker">
+            <span>${l.chrome.accentColor}</span>
+            <input type="color" data-accent-color value="#5b5bd6" aria-label="${l.chrome.accentValue}">
+            <output data-accent-value>#5B5BD6</output>
+            <button type="button" data-accent-preset="#5b5bd6" aria-label="Indigo"></button>
+            <button type="button" data-accent-preset="#df5b3f" aria-label="Coral"></button>
+            <button type="button" data-accent-preset="#2e8b68" aria-label="Forest"></button>
+            <button type="button" data-accent-preset="#b47b23" aria-label="Amber"></button>
+          </label>
           <select data-theme-select aria-label="${l.chrome.theme}" hidden>
             <option value="light">${l.theme.light}</option>
             <option value="dark">${l.theme.dark}</option>
@@ -839,6 +848,10 @@ export class EditorShell implements ScribevaEditor {
         if (target.closest("[data-apply-template]")) this.#applyTemplate();
 
         if (target.closest('[data-action="theme"]')) this.#toggleTheme();
+        const accentPreset = target.closest<HTMLButtonElement>("[data-accent-preset]");
+        if (accentPreset?.dataset.accentPreset) {
+          this.#setAccentColor(accentPreset.dataset.accentPreset);
+        }
         const themeChoice = target.closest<HTMLButtonElement>("[data-theme-choice]");
         if (themeChoice?.dataset.themeChoice) {
           this.#setTheme(themeChoice.dataset.themeChoice);
@@ -877,6 +890,8 @@ export class EditorShell implements ScribevaEditor {
             "is-toolbar-sticky",
             (target as HTMLInputElement).checked,
           );
+        } else if (target.matches("[data-accent-color]")) {
+          this.#setAccentColor((target as HTMLInputElement).value);
         } else if (target.matches("[data-sticky-offset]")) {
           const input = target as HTMLInputElement;
           const value = Math.min(
@@ -1327,6 +1342,17 @@ export class EditorShell implements ScribevaEditor {
   #printDocument(): void {
     const printWindow = window.open("about:blank", "_blank");
     if (!printWindow) return;
+    const themeStyles = getComputedStyle(this.#root);
+    const printColor = (name: string, fallback: string): string =>
+      themeStyles.getPropertyValue(name).trim() || fallback;
+    const accent = printColor("--scribeva-accent", "#5b5bd6");
+    const accentStrong = printColor("--scribeva-accent-strong", accent);
+    const accentSoft = printColor("--scribeva-accent-soft", "#eeeeff");
+    const surface = printColor("--scribeva-surface", "#ffffff");
+    const background = printColor("--scribeva-bg", "#eef1f6");
+    const text = printColor("--scribeva-text", "#172033");
+    const muted = printColor("--scribeva-text-muted", "#697386");
+    const border = printColor("--scribeva-border-strong", "#c5ccd8");
     printWindow.opener = null;
     const printDocument = printWindow.document;
     printDocument.title = this.#locale.chrome.printPreviewTitle;
@@ -1337,22 +1363,22 @@ export class EditorShell implements ScribevaEditor {
     viewport.content = "width=device-width, initial-scale=1";
     const style = printDocument.createElement("style");
     style.textContent = `
-      :root { color: #172033; background: #e9edf2; font-family: system-ui, sans-serif; }
+      :root { color: ${text}; background: ${background}; font-family: system-ui, sans-serif; }
       * { box-sizing: border-box; }
       body { margin: 0; }
-      .print-toolbar { position: sticky; z-index: 2; top: 0; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #d9dee7; background: rgb(255 255 255 / 96%); box-shadow: 0 4px 18px rgb(23 32 51 / 10%); }
+      .print-toolbar { position: sticky; z-index: 2; top: 0; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid ${border}; background: ${surface}; box-shadow: 0 4px 18px rgb(23 32 51 / 10%); }
       .print-toolbar strong { margin-right: auto; }
-      .print-toolbar small { color: #697386; }
-      button { min-height: 38px; padding: 0 16px; border: 1px solid #4747c4; border-radius: 6px; background: #5b5bd6; color: white; font: inherit; cursor: pointer; }
-      button.secondary { border-color: #c5ccd8; background: white; color: #172033; }
-      main { width: min(816px, calc(100% - 32px)); min-height: 1056px; margin: 32px auto; padding: 72px 76px; background: white; box-shadow: 0 18px 45px rgb(27 39 65 / 14%); }
+      .print-toolbar small { color: ${muted}; }
+      button { min-height: 38px; padding: 0 16px; border: 1px solid ${accentStrong}; border-radius: 6px; background: ${accent}; color: white; font: inherit; cursor: pointer; }
+      button.secondary { border-color: ${border}; background: ${surface}; color: ${text}; }
+      main { width: min(816px, calc(100% - 32px)); min-height: 1056px; margin: 32px auto; padding: 72px 76px; background: ${surface}; box-shadow: 0 18px 45px rgb(27 39 65 / 14%); }
       h1 { font-size: 2.25em; line-height: 1.15; } h2 { margin-top: 1.6em; }
       p, li, td, th { line-height: 1.65; }
-      blockquote { margin: 1.5em 0; padding: .25em 1em; border-left: 4px solid #5b5bd6; color: #4f596c; }
-      table { width: 100%; border-collapse: collapse; } th, td { padding: 8px 10px; border: 1px solid #c5ccd8; text-align: left; }
+      blockquote { margin: 1.5em 0; padding: .25em 1em; border-left: 4px solid ${accent}; color: ${muted}; }
+      table { width: 100%; border-collapse: collapse; } th, td { padding: 8px 10px; border: 1px solid ${border}; text-align: left; }
       img { max-width: 100%; height: auto; }
-      .scribeva-columns { column-rule: 1px solid #d9dee7; }
-      .scribeva-page-break { height: 14px; margin: 2.4em -24px; border: 0; border-top: 1px dashed #929bad; border-bottom: 1px dashed #929bad; background: #eef1f6; }
+      .scribeva-columns { column-rule: 1px solid ${border}; }
+      .scribeva-page-break { height: 14px; margin: 2.4em -24px; border: 0; border-top: 1px dashed ${border}; border-bottom: 1px dashed ${border}; background: ${accentSoft}; }
       @media print {
         :root { background: white; }
         .print-toolbar { display: none !important; }
@@ -1542,6 +1568,42 @@ export class EditorShell implements ScribevaEditor {
         button.setAttribute(
           "aria-checked",
           String(button.dataset.themeChoice === theme),
+        );
+      },
+    );
+    this.#syncAccentControl();
+  }
+
+  #setAccentColor(value: string): void {
+    const normalized = value.trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/u.test(normalized)) return;
+    this.#root.style.setProperty("--scribeva-accent", normalized);
+    this.#root.style.setProperty(
+      "--scribeva-accent-strong",
+      `color-mix(in srgb, ${normalized} 78%, #000)`,
+    );
+    this.#root.style.setProperty(
+      "--scribeva-accent-soft",
+      `color-mix(in srgb, ${normalized} 13%, var(--scribeva-surface))`,
+    );
+    this.#root.style.setProperty("--scribeva-focus", normalized);
+    this.#syncAccentControl(normalized);
+  }
+
+  #syncAccentControl(value?: string): void {
+    const input = this.#root.querySelector<HTMLInputElement>("[data-accent-color]");
+    const output = this.#root.querySelector<HTMLOutputElement>("[data-accent-value]");
+    const computed = getComputedStyle(this.#root)
+      .getPropertyValue("--scribeva-accent")
+      .trim();
+    const candidate = value ?? (computed.startsWith("#") ? computed : "#5b5bd6");
+    if (input && /^#[0-9a-f]{6}$/u.test(candidate)) input.value = candidate;
+    if (output) output.value = candidate.toUpperCase();
+    this.#root.querySelectorAll<HTMLButtonElement>("[data-accent-preset]").forEach(
+      (button) => {
+        button.classList.toggle(
+          "is-selected",
+          button.dataset.accentPreset?.toLowerCase() === candidate.toLowerCase(),
         );
       },
     );

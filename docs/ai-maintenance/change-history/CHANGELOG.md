@@ -49,10 +49,13 @@
   table columns with sanitized metadata and undoable authoring commands.
 - Configurable sticky-toolbar top and bottom offsets, default-visible page-break
   markers, editor-only isolated printing, and a previewable Templates tab with
-  four localized, undoable starter documents.
+  nine localized, undoable starter documents.
 - Separate, opener-isolated print-preview tabs that never alter host-page print
-  state; a three-section View ribbon; and four additional creative templates
-  for brand, launch, case-study, and workshop workflows.
+  state; a three-section View ribbon; and additional creative templates for
+  brand, launch, case-study, workshop, and campaign workflows.
 - A dedicated campaign-concept template with advertising-brief structure
   (insight, headline, key visual, and CTA), plus theme cards and a document-view
   hint in the View panel.
+- Mobile-first Ribbon and template layouts with 44px touch targets, stacked
+  View sections, safe-area dialog spacing, controlled custom accent colors, and
+  print styles that inherit the active editor palette.

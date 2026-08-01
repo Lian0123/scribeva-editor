@@ -41,6 +41,11 @@ separate tab is opened, `window.opener` is severed, sanitized document content
 and localized controls are created there, Print/Close work, and the host page
 never receives print-only classes or portal markup.
 
+Responsive specifications run at a 390px viewport and assert no document-level
+horizontal overflow, touch-sized theme controls, stacked View sections, and a
+mobile-safe template action area. Theme tests cover visible mode cards, custom
+accent synchronization, and print-style token propagation.
+
 Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.
 Metadata tests cover description, Open Graph image, canonical URL, and
