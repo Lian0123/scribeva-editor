@@ -62,6 +62,7 @@ const TAG_ATTRIBUTES: Record<string, Set<string>> = {
   col: new Set(["span", "width"]),
   img: new Set(["src", "alt", "title", "width", "height"]),
   ol: new Set(["start", "type"]),
+  table: new Set(["data-scribeva-sortable"]),
   td: new Set(["colspan", "rowspan"]),
   th: new Set(["colspan", "rowspan", "scope"]),
 };
@@ -182,6 +183,9 @@ function copySafeAttributes(source: Element, target: HTMLElement): void {
     }
 
     if (name === "target" && attribute.value !== "_blank") continue;
+    if (name === "data-scribeva-sortable" && attribute.value !== "true") {
+      continue;
+    }
     if (
       ["width", "height", "colspan", "rowspan", "span", "start"].includes(
         name,

@@ -18,6 +18,18 @@ const paths: Record<string, string> = {
     '<rect x="3" y="3" width="13" height="18" rx="1.5"/><path d="M9.5 3v18M3 9h13M3 15h13M18.5 12h4M20.5 10v4"/>',
   tableColumnDelete:
     '<rect x="3" y="3" width="13" height="18" rx="1.5"/><path d="M9.5 3v18M3 9h13M3 15h13M18.5 12h4"/>',
+  tableHeader:
+    '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M9 4v16M15 4v16M6 7h.01M12 7h.01M18 7h.01"/>',
+  tableMerge:
+    '<rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/><path d="M8 12h8M13 9l3 3-3 3"/>',
+  tableSplit:
+    '<rect x="4" y="5" width="16" height="14" rx="1"/><path d="M12 5v14M8 12h8M11 9l-3 3 3 3M13 9l3 3-3 3"/>',
+  tableDelete:
+    '<rect x="3" y="5" width="18" height="15" rx="1.5"/><path d="M3 10h18M9 5v15M15 5v15M8 2h8M10 2V1h4v1"/>',
+  tableSort:
+    '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M9 4v16M15 4v16M6 15v-3M4.5 13.5 6 12l1.5 1.5M18 12v3m-1.5-1.5L18 15l1.5-1.5"/>',
+  pageBreak:
+    '<path d="M5 3h14v6H5zM5 15h14v6H5zM3 12h3M9 12h6M18 12h3"/>',
   list: '<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
   numbered:
     '<path d="M10 6h11M10 12h11M10 18h11M4 4h1v4M3.5 11.5c.5-1 2.5-1 2.5.5 0 1-2 1.5-2.5 3H6M3.5 18h2a1 1 0 0 1-2 1.2M3.5 17a1 1 0 0 1 2-.2"/>',

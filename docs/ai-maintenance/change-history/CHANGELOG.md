@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=maintainers; verified=2026-07-31; sources=package.json,src,tests,docs/ai-maintenance -->
+<!-- AI-DOC: owner=maintainers; verified=2026-08-01; sources=package.json,src,tests,docs/ai-maintenance -->
 # Changelog
 
 ## Unreleased
@@ -44,3 +44,15 @@
   table border width with inputs shown only in custom mode; grouped directional
   SVG table row/column actions with accessible labels; and layout-aware document
   zoom with step controls and reset.
+- Opt-in sticky editor toolbar for long pages, print-aware page breaks,
+  icon-only table structure actions, sortable reader tables, and drag-to-reorder
+  table columns with sanitized metadata and undoable authoring commands.
+- Configurable sticky-toolbar top and bottom offsets, default-visible page-break
+  markers, editor-only isolated printing, and a previewable Templates tab with
+  four localized, undoable starter documents.
+- Separate, opener-isolated print-preview tabs that never alter host-page print
+  state; a three-section View ribbon; and four additional creative templates
+  for brand, launch, case-study, and workshop workflows.
+- A dedicated campaign-concept template with advertising-brief structure
+  (insight, headline, key visual, and CTA), plus theme cards and a document-view
+  hint in the View panel.

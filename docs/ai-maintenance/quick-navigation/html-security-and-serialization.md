@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=security; verified=2026-07-30; sources=src/security,tests/sanitizer.test.ts,tests/serializer.test.ts,SECURITY.md -->
+<!-- AI-DOC: owner=security; verified=2026-08-01; sources=src/security,tests/sanitizer.test.ts,tests/serializer.test.ts,SECURITY.md -->
 # HTML security and serialization
 
 `sanitizeHTML` parses input into a separate HTML document, drops dangerous
@@ -15,6 +15,11 @@ Persistent column containers use an allowed `div.scribeva-columns` with
 allowlisted `column-count` and `column-gap` styles. The serializer maps that
 class to the semantic `columns` JSON node so nested blocks round-trip without
 flattening.
+
+Reader sorting is enabled only by the exact table attribute
+`data-scribeva-sortable="true"`; other values are discarded. Page breaks reuse
+the already allowlisted `hr.scribeva-page-break` marker and round-trip through
+the deterministic serializer.
 
 `htmlToJSON` maps allowed DOM to a semantic document tree. `jsonToHTML` maps the
 tree back through the sanitizer. Browser sanitization is not a replacement for

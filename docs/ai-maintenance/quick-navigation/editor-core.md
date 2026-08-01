@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=editor-core; verified=2026-07-30; sources=src/core,src/browser/commands.ts,src/public-api.ts,tests/document-model.test.ts,tests/commands.test.ts -->
+<!-- AI-DOC: owner=editor-core; verified=2026-08-01; sources=src/core,src/browser/commands.ts,src/public-api.ts,tests/document-model.test.ts,tests/commands.test.ts -->
 # Editor core
 
 `DocumentModel` owns sanitized HTML, structured JSON, snapshots, and history.
@@ -7,13 +7,24 @@ factories in `createDefaultCommands` modify the current DOM selection and call
 `commit`.
 
 Table commands operate on the cell containing the current Range. They cover
-row/column insertion and removal, header-row conversion, merge-right, split,
-table deletion, and top/middle/bottom vertical alignment. `insertText` is the
+row/column insertion and removal, whole-column reordering, header-row
+conversion, merge-right, split, table deletion, reader-sortability metadata,
+and top/middle/bottom vertical alignment. Column reordering rejects merged
+cell grids because their visual column coordinates are ambiguous. `insertText` is the
 generic Unicode character insertion path used by the emoji and
 mathematical-symbol pickers. Font-size and line-height commands validate
 custom numeric values before applying styles. The `columns` command wraps the
 selected top-level block range in a persistent `scribeva-columns` container;
 one column unwraps an existing container.
+
+`pageBreak` inserts a sanitized `hr.scribeva-page-break` plus a following
+paragraph so editing can continue. CSS renders the marker on screen and maps
+it to a real print page break.
+
+Built-in templates are trusted UI definitions, but applying one still uses the
+normal `EditorEngine.setHTML(..., "command")` path. This makes replacement a
+sanitized, observable, undoable document operation rather than a direct DOM
+write.
 
 Table formatting commands apply outline and internal grid color, width, and
 style to the table and every cell. Cell fill applies to the active cell.

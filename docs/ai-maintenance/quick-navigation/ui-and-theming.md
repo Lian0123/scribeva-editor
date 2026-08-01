@@ -1,7 +1,7 @@
-<!-- AI-DOC: owner=design-system; verified=2026-07-31; sources=src/ui,src/locales,src/styles.css,demo -->
+<!-- AI-DOC: owner=design-system; verified=2026-08-01; sources=src/ui,src/locales,src/styles.css,demo -->
 # UI and theming
 
-`EditorShell` creates the title bar, tabs, Home/Insert/View ribbons, document
+`EditorShell` creates the title bar, tabs, Home/Insert/Templates/View ribbons, document
 canvas, status bar, and native dialog. It delegates document behavior to
 `EditorEngine`. Toolbar mousedown captures the current Range so dialogs and
 controls can restore it before a command.
@@ -26,15 +26,36 @@ group also applies one- through four-column
 layouts to the selected top-level blocks.
 
 The Insert tab includes URL images, Blob-backed local image upload, tables
-with grouped directional row/column icons, an expanded emoji picker with
-custom Unicode entry, mathematical symbols, and separators. Table action
+with grouped directional row/column and structure icons, reader-sortable
+tables, drag-to-reorder header columns, an expanded emoji picker with
+custom Unicode entry, mathematical symbols, horizontal separators, and
+print-aware page breaks. Table action
 icons show the insertion edge or deletion axis while localized tooltips and
 accessible names preserve the full command wording. View includes a sanitized
-document preview. Native
+document preview and an opt-in sticky toolbar that remains at the viewport edge
+while a long editor is scrolled. Its top offset accommodates fixed site headers;
+its bottom reserve limits toolbar height above fixed footers, and the editor root
+remains the natural sticky boundary. Page-break markers are visible by default
+and can be hidden without changing stored HTML. Native
 dialog cancellation uses a non-submit button and the dialog `cancel` event;
 only an affirmative form submit performs required-field validation. Font
 controls and CSS reference Noto Sans, Noto Serif, Noto Sans Mono, generic
 fallbacks, and platform emoji only. Font files are external consumer assets.
+
+The Templates tab ships nine dependency-free starter documents: executive
+brief, project proposal, editorial newsletter, meeting notes, brand manifesto,
+launch command center, customer case study, workshop canvas, and campaign
+concept. Cards use distinct visual cues and update an inline preview before
+application. Applying a template replaces the current document through
+`EditorEngine` with source `command`, so sanitization, change events, and undo
+remain intact.
+
+View controls are grouped into document, scrolling, and output sections rather
+than one flat tool row. Printing synchronously opens a separate `about:blank`
+tab from the user gesture, severs `window.opener`, and constructs a localized
+print-ready document using DOM APIs. The source editor page is never mutated or
+restyled. The print tab contains only sanitized editor HTML, dedicated screen
+and print CSS, explicit Print and Close controls, and real page-break behavior.
 
 The official site uses a forest-green editorial system, warm-paper surfaces,
 and layered GSAP/ScrollTrigger motion: staged hero construction, document

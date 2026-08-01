@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=quality; verified=2026-07-31; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
+<!-- AI-DOC: owner=quality; verified=2026-08-01; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
 # Testing and verification
 
 | Change | Minimum verification | Additional verification |
@@ -33,6 +33,13 @@ HTML source specifications cover line numbering, source sanitization,
 Ctrl/Command+S, visual/source tab synchronization, and history restoration.
 Table specifications exercise every directional border preset and verify
 computed no-border behavior in a real browser.
+
+View and template specifications assert the three-section settings layout,
+nine localized template cards, preview selection, sanitized undoable
+application, and default page-break visibility. Print tests verify that a
+separate tab is opened, `window.opener` is severed, sanitized document content
+and localized controls are created there, Print/Close work, and the host page
+never receives print-only classes or portal markup.
 
 Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.

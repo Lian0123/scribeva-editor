@@ -496,6 +496,47 @@ const tableDeleteColumn = tableMutation(({ table, columnIndex }) => {
   return table.rows[0]?.cells[Math.max(0, columnIndex - 1)] ?? table;
 });
 
+const tableMoveColumn: EditorCommand = ({ element, commit }, rawValue) => {
+  const context = selectedTableContext(element);
+  if (!context || !rawValue || typeof rawValue !== "object") return false;
+  const { from, to } = rawValue as { from?: unknown; to?: unknown };
+  if (
+    !Number.isInteger(from) ||
+    !Number.isInteger(to) ||
+    from === to ||
+    Number(from) < 0 ||
+    Number(to) < 0 ||
+    context.table.querySelector(
+      "[colspan]:not([colspan='1']), [rowspan]:not([rowspan='1'])",
+    )
+  ) {
+    return false;
+  }
+  const sourceIndex = Number(from);
+  const targetIndex = Number(to);
+  const rows = Array.from(context.table.rows);
+  if (
+    rows.length === 0 ||
+    rows.some(
+      (row) => sourceIndex >= row.cells.length || targetIndex >= row.cells.length,
+    )
+  ) {
+    return false;
+  }
+
+  rows.forEach((row) => {
+    const source = row.cells[sourceIndex];
+    const target = row.cells[targetIndex];
+    if (!source || !target) return;
+    if (sourceIndex < targetIndex) target.after(source);
+    else target.before(source);
+  });
+  const focusTarget = rows[0]?.cells[targetIndex];
+  if (focusTarget) selectContents(focusTarget);
+  commit("command");
+  return true;
+};
+
 const tableHeaderRow = tableMutation(({ table }) => {
   const firstRow = table.rows[0];
   if (!firstRow) return table;
@@ -542,6 +583,16 @@ const tableDelete = tableMutation(({ table }) => {
   paragraph.append(document.createElement("br"));
   table.replaceWith(paragraph);
   return paragraph;
+});
+
+const tableToggleSortable = tableMutation(({ table, cell }) => {
+  if (!table.querySelector("th")) return cell;
+  if (table.dataset.scribevaSortable === "true") {
+    delete table.dataset.scribevaSortable;
+  } else {
+    table.dataset.scribevaSortable = "true";
+  }
+  return cell;
 });
 
 function applyTableBorderStyle(
@@ -712,6 +763,15 @@ const insertHorizontalRule: EditorCommand = ({ element, commit }) => {
   return changed;
 };
 
+const insertPageBreak: EditorCommand = ({ element, commit }) => {
+  const changed = insertHTML(
+    element,
+    '<hr class="scribeva-page-break"><p><br></p>',
+  );
+  if (changed) commit("command");
+  return changed;
+};
+
 const selectAll: EditorCommand = ({ element }) => {
   const selection = window.getSelection();
   const range = document.createRange();
@@ -780,10 +840,12 @@ export function createDefaultCommands(): Record<string, EditorCommand> {
     tableAddColumnBefore: tableAddColumn("before"),
     tableAddColumnAfter: tableAddColumn("after"),
     tableDeleteColumn,
+    tableMoveColumn,
     tableHeaderRow,
     tableMergeRight,
     tableSplitCell,
     tableDelete,
+    tableToggleSortable,
     tableBorderColor,
     tableBorderWidth,
     tableBorderStyle,
@@ -803,6 +865,7 @@ export function createDefaultCommands(): Record<string, EditorCommand> {
       return true;
     },
     horizontalRule: insertHorizontalRule,
+    pageBreak: insertPageBreak,
     columns: setColumns,
     selectAll,
   };

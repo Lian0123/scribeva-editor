@@ -220,6 +220,167 @@ describe("Scribeva public editor API", () => {
     expect(root.style.getPropertyValue("--scribeva-zoom")).toBe("1");
   });
 
+  it("keeps the toolbar available on request and uses icons for table structure actions", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    createEditor(host, { initialHTML: "<p>Long document</p>", locale: "en" });
+    const root = host.querySelector<HTMLElement>(".scribeva")!;
+    const sticky = host.querySelector<HTMLInputElement>("[data-sticky-toolbar]")!;
+
+    expect(host.querySelectorAll(".scribeva__view-section")).toHaveLength(3);
+    expect(
+      host.querySelector(
+        '.scribeva__view-section--output [data-command="view:print"]',
+      ),
+    ).not.toBeNull();
+    const themeDark = host.querySelector<HTMLButtonElement>(
+      '[data-theme-choice="dark"]',
+    )!;
+    themeDark.click();
+    expect(root.dataset.theme).toBe("dark");
+    expect(themeDark.getAttribute("aria-checked")).toBe("true");
+    expect(sticky.checked).toBe(false);
+    sticky.checked = true;
+    sticky.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.classList.contains("is-toolbar-sticky")).toBe(true);
+
+    const topOffset = host.querySelector<HTMLInputElement>(
+      '[data-sticky-offset="top"]',
+    )!;
+    const bottomOffset = host.querySelector<HTMLInputElement>(
+      '[data-sticky-offset="bottom"]',
+    )!;
+    topOffset.value = "24";
+    topOffset.dispatchEvent(new Event("change", { bubbles: true }));
+    bottomOffset.value = "72";
+    bottomOffset.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.style.getPropertyValue("--scribeva-sticky-top")).toBe("24px");
+    expect(root.style.getPropertyValue("--scribeva-sticky-bottom")).toBe("72px");
+
+    ["tableHeaderRow", "tableMergeRight", "tableSplitCell", "tableDelete"].forEach(
+      (command) => {
+        const button = host.querySelector<HTMLButtonElement>(
+          `[data-command="${command}"]`,
+        )!;
+        expect(button.querySelector("svg")).not.toBeNull();
+        expect(button.querySelector(".scribeva__tool-text")).toBeNull();
+      },
+    );
+    expect(
+      host.querySelector<HTMLButtonElement>('[data-command="pageBreak"] svg'),
+    ).not.toBeNull();
+  });
+
+  it("shows page-break markers by default and lets View hide them", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    createEditor(host, {
+      initialHTML: '<p>One</p><hr class="scribeva-page-break"><p>Two</p>',
+      locale: "en",
+    });
+    const root = host.querySelector<HTMLElement>(".scribeva")!;
+    const toggle = host.querySelector<HTMLInputElement>("[data-show-page-breaks]")!;
+    expect(toggle.checked).toBe(true);
+    expect(root.classList.contains("hide-page-breaks")).toBe(false);
+    toggle.checked = false;
+    toggle.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.classList.contains("hide-page-breaks")).toBe(true);
+  });
+
+  it("opens a self-contained print tab without changing the host page", () => {
+    const printDocument = document.implementation.createHTMLDocument();
+    const popup = {
+      document: printDocument,
+      opener: window,
+      focus: vi.fn(),
+      print: vi.fn(),
+      close: vi.fn(),
+    };
+    const open = vi
+      .spyOn(window, "open")
+      .mockReturnValue(popup as unknown as Window);
+    const host = document.querySelector<HTMLElement>("#host")!;
+    createEditor(host, { initialHTML: "<h1>Print me</h1>", locale: "en" });
+
+    host.querySelector<HTMLButtonElement>('[data-command="view:print"]')?.click();
+    expect(open).toHaveBeenCalledWith("about:blank", "_blank");
+    expect(popup.opener).toBeNull();
+    expect(popup.focus).toHaveBeenCalledOnce();
+    expect(printDocument.querySelector("main")?.innerHTML).toBe(
+      "<h1>Print me</h1>",
+    );
+    expect(printDocument.querySelector(".print-toolbar")?.textContent).toContain(
+      "Print-ready document",
+    );
+    expect(document.body.classList.contains("scribeva-printing")).toBe(false);
+    expect(document.querySelector(".scribeva-print-portal")).toBeNull();
+
+    Array.from(printDocument.querySelectorAll("button")).find(
+      (button) => button.textContent === "Print",
+    )?.click();
+    expect(popup.print).toHaveBeenCalledOnce();
+    Array.from(printDocument.querySelectorAll("button")).find(
+      (button) => button.textContent === "Close",
+    )?.click();
+    expect(popup.close).toHaveBeenCalledOnce();
+    open.mockRestore();
+  });
+
+  it("previews and applies undoable document templates", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, { initialHTML: "<p>Original</p>", locale: "en" });
+    host.querySelector<HTMLButtonElement>('[data-tab="templates"]')?.click();
+    const newsletter = host.querySelector<HTMLButtonElement>(
+      '[data-template-id="newsletter"]',
+    )!;
+    newsletter.click();
+    expect(newsletter.getAttribute("aria-pressed")).toBe("true");
+    expect(host.querySelector("[data-template-preview]")?.textContent).toContain(
+      "Editorial newsletter",
+    );
+
+    host.querySelector<HTMLButtonElement>("[data-apply-template]")?.click();
+    expect(editor.getHTML()).toContain("Editorial newsletter");
+    expect(editor.getHTML()).toContain("scribeva-page-break");
+    expect(editor.exec("undo")).toBe(true);
+    expect(editor.getHTML()).toBe("<p>Original</p>");
+    expect(host.querySelectorAll("[data-template-id]")).toHaveLength(9);
+  });
+
+  it("sorts sortable table rows in preview without rewriting authored HTML", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const initialHTML =
+      '<table data-scribeva-sortable="true"><thead><tr><th>Name</th></tr></thead>' +
+      "<tbody><tr><td>Zulu</td></tr><tr><td>Alpha</td></tr></tbody></table>";
+    const editor = createEditor(host, { initialHTML, locale: "en" });
+
+    host
+      .querySelector<HTMLButtonElement>('[data-command="dialog:preview"]')
+      ?.click();
+    const header = host.querySelector<HTMLTableCellElement>(
+      ".scribeva__preview th",
+    )!;
+    expect(header.tabIndex).toBe(0);
+    header.click();
+    expect(header.getAttribute("aria-sort")).toBe("ascending");
+    expect(
+      Array.from(
+        host.querySelectorAll<HTMLTableCellElement>(
+          ".scribeva__preview tbody td",
+        ),
+        (cell) => cell.textContent,
+      ),
+    ).toEqual(["Alpha", "Zulu"]);
+
+    header.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(header.getAttribute("aria-sort")).toBe("descending");
+    expect(editor.getHTML()).toBe(initialHTML);
+  });
+
   it("inserts mathematical symbols and user-supplied emoji", () => {
     const host = document.querySelector<HTMLElement>("#host")!;
     const editor = createEditor(host, { initialHTML: "<p>Formula: </p>" });

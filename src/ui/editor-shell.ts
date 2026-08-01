@@ -17,6 +17,24 @@ type DialogKind =
   | "symbol"
   | "preview";
 
+type TemplateId =
+  | "executive"
+  | "proposal"
+  | "newsletter"
+  | "meeting"
+  | "manifesto"
+  | "launch"
+  | "caseStudy"
+  | "workshop"
+  | "adConcept";
+
+interface DocumentTemplate {
+  id: TemplateId;
+  title: string;
+  description: string;
+  html: string;
+}
+
 const EMOJI = [
   "😀",
   "😃",
@@ -182,6 +200,17 @@ export class EditorShell implements ScribevaEditor {
   readonly #dialog: HTMLDialogElement;
   readonly #abortController = new AbortController();
   readonly #blobUrls = new Set<string>();
+  readonly #tableSortState = new WeakMap<
+    HTMLTableElement,
+    { column: number; direction: "ascending" | "descending" }
+  >();
+  #draggedColumn: {
+    table: HTMLTableElement;
+    from: number;
+    to?: number;
+  } | null = null;
+  #pointerColumnDrag: { table: HTMLTableElement; from: number } | null = null;
+  #selectedTemplate: TemplateId = "executive";
   #savedRange: Range | null = null;
 
   constructor(host: HTMLElement, options: EditorOptions = {}) {
@@ -214,6 +243,7 @@ export class EditorShell implements ScribevaEditor {
     this.#sourcePosition = sourcePosition;
     this.#status = status;
     this.#dialog = dialog;
+    this.#setTheme(options.theme ?? "light");
 
     this.#content.dataset.placeholder =
       options.placeholder ?? this.#locale.placeholder;
@@ -234,11 +264,13 @@ export class EditorShell implements ScribevaEditor {
     if (options.initialJSON) this.#engine.setJSON(options.initialJSON);
     this.#engine.setReadOnly(options.readOnly ?? false);
     this.#engine.onChange((change) => {
+      this.#refreshTableInteractions();
       this.#updateStatus();
       options.onChange?.(change);
     });
 
     this.#bindUI();
+    this.#refreshTableInteractions();
     this.#updateStatus();
     if (options.autofocus) queueMicrotask(() => this.focus());
   }
@@ -249,6 +281,7 @@ export class EditorShell implements ScribevaEditor {
 
   setHTML(html: string): void {
     this.#engine.setHTML(html);
+    this.#refreshTableInteractions();
     this.#updateStatus();
   }
 
@@ -258,6 +291,7 @@ export class EditorShell implements ScribevaEditor {
 
   setJSON(document: ScribevaDocument): void {
     this.#engine.setJSON(document);
+    this.#refreshTableInteractions();
     this.#updateStatus();
   }
 
@@ -276,6 +310,7 @@ export class EditorShell implements ScribevaEditor {
   setReadOnly(readOnly: boolean): void {
     this.#engine.setReadOnly(readOnly);
     this.#root.classList.toggle("is-readonly", readOnly);
+    this.#refreshTableInteractions();
   }
 
   insertImageBlob(blob: Blob, alt = ""): string {
@@ -331,9 +366,11 @@ export class EditorShell implements ScribevaEditor {
         </div>
       </header>
 
+      <div class="scribeva__toolbar" data-scribeva-toolbar>
       <nav class="scribeva__tabs" role="tablist" aria-label="${l.chrome.editorTools}">
         <button role="tab" aria-selected="true" data-tab="home">${l.tabs.home}</button>
         <button role="tab" aria-selected="false" data-tab="insert">${l.tabs.insert}</button>
+        <button role="tab" aria-selected="false" data-tab="templates">${l.tabs.templates}</button>
         <button role="tab" aria-selected="false" data-tab="view">${l.tabs.view}</button>
         <button role="tab" aria-selected="false" data-tab="html">${l.tabs.html}</button>
       </nav>
@@ -346,11 +383,15 @@ export class EditorShell implements ScribevaEditor {
       <div class="scribeva__ribbon" data-panel="insert" hidden>
         ${this.#insertGroup()}
       </div>
+      <div class="scribeva__ribbon scribeva__ribbon--templates" data-panel="templates" hidden>
+        ${this.#templateGroup()}
+      </div>
       <div class="scribeva__ribbon" data-panel="view" hidden>
         ${this.#viewGroup()}
       </div>
       <div class="scribeva__ribbon scribeva__ribbon--source" data-panel="html" hidden>
         ${this.#sourceGroup()}
+      </div>
       </div>
 
       <main class="scribeva__workspace">
@@ -541,6 +582,7 @@ export class EditorShell implements ScribevaEditor {
         ${this.#button("dialog:emoji", l.commands.emoji, undefined, "😊")}
         ${this.#button("dialog:symbol", l.commands.symbol, undefined, "∑")}
         ${this.#button("horizontalRule", l.commands.horizontalRule, "divider")}
+        ${this.#button("pageBreak", l.commands.pageBreak, "pageBreak")}
       </div>
       <input type="file" accept="image/*" data-image-upload hidden>
       <h3>${l.groups.insert}</h3>
@@ -558,11 +600,14 @@ export class EditorShell implements ScribevaEditor {
           ${this.#button("tableDeleteColumn", l.commands.tableDeleteColumn, "tableColumnDelete")}
         </span>
       </div>
-      <div class="scribeva__control-row">
-        ${this.#button("tableHeaderRow", l.commands.tableHeaderRow, undefined, "TH")}
-        ${this.#button("tableMergeRight", l.commands.tableMergeRight, undefined, "⇥")}
-        ${this.#button("tableSplitCell", l.commands.tableSplitCell, undefined, "⇤")}
-        ${this.#button("tableDelete", l.commands.tableDelete, undefined, "×")}
+      <div class="scribeva__control-row scribeva__table-actions scribeva__table-structure-actions">
+        <span class="scribeva__table-action-set" role="group" aria-label="${l.groups.table}">
+          ${this.#button("tableHeaderRow", l.commands.tableHeaderRow, "tableHeader")}
+          ${this.#button("tableMergeRight", l.commands.tableMergeRight, "tableMerge")}
+          ${this.#button("tableSplitCell", l.commands.tableSplitCell, "tableSplit")}
+          ${this.#button("tableToggleSortable", l.commands.tableSortable, "tableSort")}
+          ${this.#button("tableDelete", l.commands.tableDelete, "tableDelete")}
+        </span>
         <select data-command-select="tableVerticalAlign" aria-label="${l.commands.verticalTop}">
           <option value="top">${l.commands.verticalTop}</option>
           <option value="middle">${l.commands.verticalMiddle}</option>
@@ -610,21 +655,136 @@ export class EditorShell implements ScribevaEditor {
 
   #viewGroup(): string {
     const l = this.#locale;
-    return `<section class="scribeva__group">
-      <div class="scribeva__large-tools">
-        ${this.#button("view:focus", l.commands.focusMode, "focus")}
-        ${this.#button("dialog:preview", l.commands.preview, "preview")}
-        ${this.#button("view:print", l.commands.print, "print")}
-        <label class="scribeva__theme-select">
-          ${l.chrome.theme}
-          <select data-theme-select>
+    return `<section class="scribeva__group scribeva__view-group">
+      <div class="scribeva__view-section">
+        <span class="scribeva__view-section-title">${l.groups.document}</span>
+        <div class="scribeva__view-primary-actions">
+          ${this.#button("view:focus", l.commands.focusMode, "focus")}
+          ${this.#button("dialog:preview", l.commands.preview, "preview")}
+        </div>
+        <small class="scribeva__view-hint">${l.chrome.documentViewHint}</small>
+        <div class="scribeva__theme-picker" role="radiogroup" aria-label="${l.chrome.theme}">
+          <span>${l.chrome.themeHint}</span>
+          <div>
+            <button type="button" class="scribeva__theme-card" data-theme-choice="light" aria-checked="true"><i class="scribeva__theme-card-swatch is-light"></i><b>${l.theme.light}</b></button>
+            <button type="button" class="scribeva__theme-card" data-theme-choice="dark" aria-checked="false"><i class="scribeva__theme-card-swatch is-dark"></i><b>${l.theme.dark}</b></button>
+            <button type="button" class="scribeva__theme-card" data-theme-choice="system" aria-checked="false"><i class="scribeva__theme-card-swatch is-system"></i><b>${l.theme.system}</b></button>
+          </div>
+          <select data-theme-select aria-label="${l.chrome.theme}" hidden>
             <option value="light">${l.theme.light}</option>
             <option value="dark">${l.theme.dark}</option>
             <option value="system">${l.theme.system}</option>
           </select>
+        </div>
+      </div>
+      <div class="scribeva__view-section scribeva__view-section--scroll">
+        <span class="scribeva__view-section-title">${l.chrome.keepToolbarVisible}</span>
+        <label class="scribeva__view-option scribeva__sticky-option">
+          <input type="checkbox" data-sticky-toolbar>
+          <span>${l.chrome.keepToolbarVisible}</span>
+        </label>
+        <label class="scribeva__view-option">
+          <span>${l.chrome.stickyTopOffset}</span>
+          <span class="scribeva__unit-input"><input type="number" min="0" max="240" step="1" value="0" data-sticky-offset="top"><b>px</b></span>
+        </label>
+        <label class="scribeva__view-option">
+          <span>${l.chrome.stickyBottomOffset}</span>
+          <span class="scribeva__unit-input"><input type="number" min="0" max="320" step="1" value="0" data-sticky-offset="bottom"><b>px</b></span>
         </label>
       </div>
+      <div class="scribeva__view-section scribeva__view-section--output">
+        <span class="scribeva__view-section-title">${l.commands.print}</span>
+        <label class="scribeva__view-option scribeva__page-break-option">
+          <input type="checkbox" data-show-page-breaks checked>
+          <span>${l.chrome.showPageBreaks}</span>
+        </label>
+        <div class="scribeva__print-action">
+          ${this.#button("view:print", l.commands.print, "print")}
+          <small class="scribeva__print-note">${l.chrome.printDocumentOnly}</small>
+        </div>
+      </div>
       <h3>${l.groups.appearance}</h3>
+    </section>`;
+  }
+
+  #templates(): DocumentTemplate[] {
+    const copy = this.#locale.templates;
+    const labels = Object.fromEntries(
+      Object.entries(copy.labels).map(([key, value]) => [key, escapeMarkup(value)]),
+    ) as Record<keyof typeof copy.labels, string>;
+    return [
+      {
+        id: "executive",
+        ...copy.executive,
+        html: `<h1>${escapeMarkup(copy.executive.title)}</h1><blockquote>${escapeMarkup(copy.executive.description)}</blockquote><hr><h2>${labels.keySignals}</h2><table><thead><tr><th>${labels.keySignals}</th><th>${labels.status}</th><th>${labels.owner}</th></tr></thead><tbody><tr><td>01</td><td>—</td><td>—</td></tr><tr><td>02</td><td>—</td><td>—</td></tr></tbody></table><h2>${labels.nextActions}</h2><ol><li>—</li><li>—</li></ol>`,
+      },
+      {
+        id: "proposal",
+        ...copy.proposal,
+        html: `<h1>${escapeMarkup(copy.proposal.title)}</h1><blockquote>${escapeMarkup(copy.proposal.description)}</blockquote><hr><h2>${labels.goals}</h2><ul><li>01 —</li><li>02 —</li></ul><h2>${labels.deliveryPlan}</h2><table><thead><tr><th>${labels.actions}</th><th>${labels.date}</th><th>${labels.owner}</th></tr></thead><tbody><tr><td>01</td><td>—</td><td>—</td></tr><tr><td>02</td><td>—</td><td>—</td></tr></tbody></table>`,
+      },
+      {
+        id: "newsletter",
+        ...copy.newsletter,
+        html: `<p><strong>01 · EDITION</strong></p><h1>${escapeMarkup(copy.newsletter.title)}</h1><blockquote>${escapeMarkup(copy.newsletter.description)}</blockquote><hr class="scribeva-page-break"><h2>${labels.leadStory}</h2><p>—</p><h2>${labels.inBrief}</h2><ul><li>01 —</li><li>02 —</li><li>03 —</li></ul>`,
+      },
+      {
+        id: "meeting",
+        ...copy.meeting,
+        html: `<h1>${escapeMarkup(copy.meeting.title)}</h1><p>${escapeMarkup(copy.meeting.description)}</p><table><tbody><tr><th>${labels.date}</th><td>YYYY-MM-DD</td></tr><tr><th>${labels.participants}</th><td>—</td></tr><tr><th>${labels.purpose}</th><td>—</td></tr></tbody></table><h2>${labels.agenda}</h2><ol><li>01 —</li><li>02 —</li><li>03 —</li></ol><h2>${labels.actions}</h2><table><thead><tr><th>${labels.actions}</th><th>${labels.owner}</th><th>${labels.date}</th></tr></thead><tbody><tr><td>—</td><td>—</td><td>—</td></tr></tbody></table>`,
+      },
+      {
+        id: "manifesto",
+        ...copy.manifesto,
+        html: `<p><strong>01 / MANIFESTO</strong></p><h1>${escapeMarkup(copy.manifesto.title)}</h1><blockquote>${escapeMarkup(copy.manifesto.description)}</blockquote><hr><div class="scribeva-columns" style="column-count: 2; column-gap: 32px"><h2>${labels.keySignals}</h2><p>01 —</p><p>02 —</p><p>03 —</p><h2>${labels.nextActions}</h2><p>04 —</p><p>05 —</p><p>06 —</p></div>`,
+      },
+      {
+        id: "launch",
+        ...copy.launch,
+        html: `<p><strong>LAUNCH / 00:00</strong></p><h1>${escapeMarkup(copy.launch.title)}</h1><blockquote>${escapeMarkup(copy.launch.description)}</blockquote><h2>${labels.deliveryPlan}</h2><table><thead><tr><th>${labels.actions}</th><th>${labels.status}</th><th>${labels.owner}</th></tr></thead><tbody><tr><td>01</td><td>READY</td><td>—</td></tr><tr><td>02</td><td>HOLD</td><td>—</td></tr><tr><td>03</td><td>GO</td><td>—</td></tr></tbody></table><hr class="scribeva-page-break"><h2>${labels.keySignals}</h2><ul><li>01 —</li><li>02 —</li><li>03 —</li></ul>`,
+      },
+      {
+        id: "caseStudy",
+        ...copy.caseStudy,
+        html: `<p><strong>CASE / 001</strong></p><h1>${escapeMarkup(copy.caseStudy.title)}</h1><blockquote>${escapeMarkup(copy.caseStudy.description)}</blockquote><h2>${labels.purpose}</h2><p>—</p><h2>${labels.keySignals}</h2><table><tbody><tr><th>01</th><td>—</td></tr><tr><th>02</th><td>—</td></tr><tr><th>03</th><td>—</td></tr></tbody></table><h2>${labels.nextActions}</h2><p>—</p>`,
+      },
+      {
+        id: "workshop",
+        ...copy.workshop,
+        html: `<h1>${escapeMarkup(copy.workshop.title)}</h1><blockquote>${escapeMarkup(copy.workshop.description)}</blockquote><table><tbody><tr><th>${labels.date}</th><td>—</td></tr><tr><th>${labels.participants}</th><td>—</td></tr><tr><th>${labels.purpose}</th><td>—</td></tr></tbody></table><h2>${labels.agenda}</h2><ol><li>01 —</li><li>02 —</li><li>03 —</li></ol><hr class="scribeva-page-break"><h2>${labels.actions}</h2><table><thead><tr><th>${labels.actions}</th><th>${labels.owner}</th></tr></thead><tbody><tr><td>—</td><td>—</td></tr></tbody></table>`,
+      },
+      {
+        id: "adConcept",
+        ...copy.adConcept,
+        html: `<p><strong>01 / 001</strong></p><h1>${escapeMarkup(copy.adConcept.title)}</h1><blockquote>${escapeMarkup(copy.adConcept.description)}</blockquote><hr><h2>${labels.insight}</h2><p>—</p><h2>${labels.headline}</h2><p><strong>—</strong></p><h2>${labels.keyVisual}</h2><table><tbody><tr><th>${labels.scene}</th><td>—</td></tr><tr><th>${labels.mood}</th><td>—</td></tr><tr><th>${labels.voice}</th><td>—</td></tr></tbody></table><h2>${labels.cta}</h2><p>—</p>`,
+      },
+    ];
+  }
+
+  #templateGroup(): string {
+    const l = this.#locale;
+    const templates = this.#templates();
+    const selected = templates[0]!;
+    return `<section class="scribeva__group scribeva__template-group">
+      <div class="scribeva__template-gallery" role="group" aria-label="${l.groups.templates}">
+        ${templates
+          .map(
+            (template, index) => `<button type="button" class="scribeva__template-card${index === 0 ? " is-selected" : ""}" data-template-id="${template.id}" aria-pressed="${index === 0}">
+              <span class="scribeva__template-card-sheet" aria-hidden="true"><i></i><i></i><i></i></span>
+              <strong>${template.title}</strong><small>${template.description}</small>
+            </button>`,
+          )
+          .join("")}
+      </div>
+      <div class="scribeva__template-preview-panel">
+        <span>${l.chrome.templatePreview}</span>
+        <article data-template-preview>${selected.html}</article>
+      </div>
+      <div class="scribeva__template-apply">
+        <button type="button" class="scribeva__button scribeva__button--primary" data-apply-template>${l.commands.applyTemplate}</button>
+        <small>${l.chrome.templateReplaceHint}</small>
+      </div>
+      <h3>${l.groups.templates}</h3>
     </section>`;
   }
 
@@ -672,7 +832,17 @@ export class EditorShell implements ScribevaEditor {
         const button = target.closest<HTMLButtonElement>("[data-command]");
         if (button?.dataset.command) this.#handleCommand(button.dataset.command);
 
+        const templateCard = target.closest<HTMLButtonElement>("[data-template-id]");
+        if (templateCard?.dataset.templateId) {
+          this.#selectTemplate(templateCard.dataset.templateId as TemplateId);
+        }
+        if (target.closest("[data-apply-template]")) this.#applyTemplate();
+
         if (target.closest('[data-action="theme"]')) this.#toggleTheme();
+        const themeChoice = target.closest<HTMLButtonElement>("[data-theme-choice]");
+        if (themeChoice?.dataset.themeChoice) {
+          this.#setTheme(themeChoice.dataset.themeChoice);
+        }
         if (target.closest("[data-dialog-cancel]")) this.#dialog.close("cancel");
 
         const characterButton = target.closest<HTMLButtonElement>(
@@ -682,6 +852,18 @@ export class EditorShell implements ScribevaEditor {
           this.#dialog.close("cancel");
           this.exec("insertText", characterButton.dataset.insertCharacter);
         }
+
+        const sortableHeader = target.closest<HTMLTableCellElement>(
+          'table[data-scribeva-sortable="true"] th',
+        );
+        if (
+          sortableHeader &&
+          (Boolean(sortableHeader.closest(".scribeva__preview")) ||
+            this.#content.getAttribute("contenteditable") === "false")
+        ) {
+          event.preventDefault();
+          this.#sortTable(sortableHeader);
+        }
       },
       { signal },
     );
@@ -690,7 +872,29 @@ export class EditorShell implements ScribevaEditor {
       "change",
       (event) => {
         const target = event.target as HTMLInputElement | HTMLSelectElement;
-        if (target.matches("[data-image-upload]")) {
+        if (target.matches("[data-sticky-toolbar]")) {
+          this.#root.classList.toggle(
+            "is-toolbar-sticky",
+            (target as HTMLInputElement).checked,
+          );
+        } else if (target.matches("[data-sticky-offset]")) {
+          const input = target as HTMLInputElement;
+          const value = Math.min(
+            Number(input.max),
+            Math.max(Number(input.min), Number(input.value) || 0),
+          );
+          input.value = String(value);
+          const property =
+            input.dataset.stickyOffset === "bottom"
+              ? "--scribeva-sticky-bottom"
+              : "--scribeva-sticky-top";
+          this.#root.style.setProperty(property, `${value}px`);
+        } else if (target.matches("[data-show-page-breaks]")) {
+          this.#root.classList.toggle(
+            "hide-page-breaks",
+            !(target as HTMLInputElement).checked,
+          );
+        } else if (target.matches("[data-image-upload]")) {
           const file = (target as HTMLInputElement).files?.[0];
           if (file) this.insertImageBlob(file, file.name);
           (target as HTMLInputElement).value = "";
@@ -752,6 +956,158 @@ export class EditorShell implements ScribevaEditor {
         } else if (target.matches("[data-theme-select]")) {
           this.#setTheme(target.value);
         }
+      },
+      { signal },
+    );
+
+    this.#content.addEventListener(
+      "pointerdown",
+      (event) => {
+        const header = (event.target as Element).closest<HTMLTableCellElement>(
+          "th[draggable=true]",
+        );
+        const table = header?.closest("table");
+        const row = header?.parentElement as HTMLTableRowElement | null;
+        if (!header || !table || !row || event.button !== 0) return;
+        const from = Array.from(row.cells).indexOf(header);
+        if (from >= 0) this.#pointerColumnDrag = { table, from };
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "pointerup",
+      (event) => {
+        const dragged = this.#pointerColumnDrag;
+        this.#pointerColumnDrag = null;
+        if (!dragged) return;
+        const pointTarget = document.elementFromPoint(event.clientX, event.clientY);
+        const eventElement = event.target instanceof Element ? event.target : null;
+        const header = (pointTarget ?? eventElement)?.closest<HTMLTableCellElement>(
+          "th",
+        );
+        const table = header?.closest("table");
+        const row = header?.parentElement as HTMLTableRowElement | null;
+        if (!header || !row || table !== dragged.table) return;
+        const to = Array.from(row.cells).indexOf(header);
+        if (to < 0 || to === dragged.from) return;
+        this.#selectContents(header);
+        this.#captureSelection();
+        this.exec("tableMoveColumn", { from: dragged.from, to });
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "pointercancel",
+      () => {
+        this.#pointerColumnDrag = null;
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "dragstart",
+      (event) => {
+        const eventElement =
+          event.target instanceof Element
+            ? event.target
+            : event.target instanceof Node
+              ? event.target.parentElement
+              : null;
+        const header = eventElement?.closest<HTMLTableCellElement>(
+          "th[draggable=true]",
+        );
+        const table = header?.closest("table");
+        const row = header?.parentElement as HTMLTableRowElement | null;
+        if (!header || !table || !row) return;
+        const from = Array.from(row.cells).indexOf(header);
+        if (from < 0) return;
+        this.#draggedColumn = { table, from };
+        event.dataTransfer?.setData("text/plain", String(from));
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+        table.classList.add("is-column-dragging");
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "dragover",
+      (event) => {
+        const eventElement =
+          event.target instanceof Element
+            ? event.target
+            : event.target instanceof Node
+              ? event.target.parentElement
+              : null;
+        const header = eventElement?.closest<HTMLTableCellElement>("th");
+        if (!header || header.closest("table") !== this.#draggedColumn?.table) {
+          return;
+        }
+        event.preventDefault();
+        const row = header.parentElement as HTMLTableRowElement | null;
+        const to = row ? Array.from(row.cells).indexOf(header) : -1;
+        if (to >= 0 && this.#draggedColumn) this.#draggedColumn.to = to;
+        this.#content
+          .querySelectorAll("th.is-column-drop-target")
+          .forEach((cell) => cell.classList.remove("is-column-drop-target"));
+        header.classList.add("is-column-drop-target");
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "drop",
+      (event) => {
+        const eventElement =
+          event.target instanceof Element
+            ? event.target
+            : event.target instanceof Node
+              ? event.target.parentElement
+              : null;
+        const header = eventElement?.closest<HTMLTableCellElement>("th");
+        const table = header?.closest("table");
+        const row = header?.parentElement as HTMLTableRowElement | null;
+        const dragged = this.#draggedColumn;
+        if (!header || !table || !row || table !== dragged?.table) return;
+        event.preventDefault();
+        const to = Array.from(row.cells).indexOf(header);
+        this.#selectContents(header);
+        this.#captureSelection();
+        this.#finishColumnDrag();
+        this.#pointerColumnDrag = null;
+        this.exec("tableMoveColumn", { from: dragged.from, to });
+      },
+      { signal },
+    );
+    this.#content.addEventListener(
+      "dragend",
+      () => {
+        const dragged = this.#draggedColumn;
+        const target =
+          dragged?.to === undefined
+            ? null
+            : dragged.table.rows[0]?.cells[dragged.to] ?? null;
+        this.#finishColumnDrag();
+        this.#pointerColumnDrag = null;
+        if (!dragged || dragged.to === undefined || dragged.to === dragged.from) {
+          return;
+        }
+        if (target) {
+          this.#selectContents(target);
+          this.#captureSelection();
+        }
+        this.exec("tableMoveColumn", { from: dragged.from, to: dragged.to });
+      },
+      { signal },
+    );
+
+    this.#root.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const header = (event.target as Element).closest<HTMLTableCellElement>(
+          'table[data-scribeva-sortable="true"] th[tabindex="0"]',
+        );
+        if (!header) return;
+        event.preventDefault();
+        this.#sortTable(header);
       },
       { signal },
     );
@@ -925,7 +1281,7 @@ export class EditorShell implements ScribevaEditor {
     } else if (command === "view:focus") {
       this.#root.classList.toggle("is-focus-mode");
     } else if (command === "view:print") {
-      window.print();
+      this.#printDocument();
     } else if (command === "imageUpload") {
       this.#root.querySelector<HTMLInputElement>("[data-image-upload]")?.click();
     } else if (command === "source:apply") {
@@ -939,6 +1295,94 @@ export class EditorShell implements ScribevaEditor {
     } else {
       this.exec(command);
     }
+  }
+
+  #selectTemplate(id: TemplateId): void {
+    const template = this.#templates().find((candidate) => candidate.id === id);
+    if (!template) return;
+    this.#selectedTemplate = id;
+    this.#root.querySelectorAll<HTMLButtonElement>("[data-template-id]").forEach(
+      (card) => {
+        const selected = card.dataset.templateId === id;
+        card.classList.toggle("is-selected", selected);
+        card.setAttribute("aria-pressed", String(selected));
+      },
+    );
+    const preview = this.#root.querySelector<HTMLElement>("[data-template-preview]");
+    if (preview) preview.innerHTML = template.html;
+  }
+
+  #applyTemplate(): void {
+    const template = this.#templates().find(
+      (candidate) => candidate.id === this.#selectedTemplate,
+    );
+    if (!template) return;
+    this.#engine.setHTML(template.html, "command");
+    this.#refreshTableInteractions();
+    this.#updateStatus();
+    this.#activateTab("home");
+    this.focus();
+  }
+
+  #printDocument(): void {
+    const printWindow = window.open("about:blank", "_blank");
+    if (!printWindow) return;
+    printWindow.opener = null;
+    const printDocument = printWindow.document;
+    printDocument.title = this.#locale.chrome.printPreviewTitle;
+    const meta = printDocument.createElement("meta");
+    meta.setAttribute("charset", "utf-8");
+    const viewport = printDocument.createElement("meta");
+    viewport.name = "viewport";
+    viewport.content = "width=device-width, initial-scale=1";
+    const style = printDocument.createElement("style");
+    style.textContent = `
+      :root { color: #172033; background: #e9edf2; font-family: system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      .print-toolbar { position: sticky; z-index: 2; top: 0; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #d9dee7; background: rgb(255 255 255 / 96%); box-shadow: 0 4px 18px rgb(23 32 51 / 10%); }
+      .print-toolbar strong { margin-right: auto; }
+      .print-toolbar small { color: #697386; }
+      button { min-height: 38px; padding: 0 16px; border: 1px solid #4747c4; border-radius: 6px; background: #5b5bd6; color: white; font: inherit; cursor: pointer; }
+      button.secondary { border-color: #c5ccd8; background: white; color: #172033; }
+      main { width: min(816px, calc(100% - 32px)); min-height: 1056px; margin: 32px auto; padding: 72px 76px; background: white; box-shadow: 0 18px 45px rgb(27 39 65 / 14%); }
+      h1 { font-size: 2.25em; line-height: 1.15; } h2 { margin-top: 1.6em; }
+      p, li, td, th { line-height: 1.65; }
+      blockquote { margin: 1.5em 0; padding: .25em 1em; border-left: 4px solid #5b5bd6; color: #4f596c; }
+      table { width: 100%; border-collapse: collapse; } th, td { padding: 8px 10px; border: 1px solid #c5ccd8; text-align: left; }
+      img { max-width: 100%; height: auto; }
+      .scribeva-columns { column-rule: 1px solid #d9dee7; }
+      .scribeva-page-break { height: 14px; margin: 2.4em -24px; border: 0; border-top: 1px dashed #929bad; border-bottom: 1px dashed #929bad; background: #eef1f6; }
+      @media print {
+        :root { background: white; }
+        .print-toolbar { display: none !important; }
+        main { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+        .scribeva-page-break { display: block; height: 0; margin: 0; border: 0; break-after: page; }
+      }
+    `;
+    printDocument.head.replaceChildren(meta, viewport, style);
+
+    const toolbar = printDocument.createElement("header");
+    toolbar.className = "print-toolbar";
+    const heading = printDocument.createElement("strong");
+    heading.textContent = this.#locale.chrome.printPreviewTitle;
+    const hint = printDocument.createElement("small");
+    hint.textContent = this.#locale.chrome.printReadyHint;
+    const close = printDocument.createElement("button");
+    close.type = "button";
+    close.className = "secondary";
+    close.textContent = this.#locale.commands.closePrint;
+    close.addEventListener("click", () => printWindow.close());
+    const print = printDocument.createElement("button");
+    print.type = "button";
+    print.textContent = this.#locale.commands.print;
+    print.addEventListener("click", () => printWindow.print());
+    toolbar.append(heading, hint, close, print);
+
+    const documentContent = printDocument.createElement("main");
+    documentContent.innerHTML = this.#engine.getHTML();
+    printDocument.body.replaceChildren(toolbar, documentContent);
+    printWindow.focus();
   }
 
   #resetSource(): void {
@@ -976,6 +1420,15 @@ export class EditorShell implements ScribevaEditor {
     ) {
       this.#savedRange = selection.getRangeAt(0).cloneRange();
     }
+  }
+
+  #selectContents(node: Node): void {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
   }
 
   #restoreSelection(): void {
@@ -1031,6 +1484,13 @@ export class EditorShell implements ScribevaEditor {
     } else {
       title.textContent = l.previewTitle;
       fields.innerHTML = `<article class="scribeva__preview">${this.#engine.getHTML()}</article>`;
+      fields
+        .querySelectorAll<HTMLTableCellElement>(
+          'table[data-scribeva-sortable="true"] th',
+        )
+        .forEach((header) => {
+          header.tabIndex = 0;
+        });
     }
 
     this.#dialog.showModal();
@@ -1077,6 +1537,69 @@ export class EditorShell implements ScribevaEditor {
     this.#root.dataset.theme = theme;
     const select = this.#root.querySelector<HTMLSelectElement>("[data-theme-select]");
     if (select) select.value = theme;
+    this.#root.querySelectorAll<HTMLButtonElement>("[data-theme-choice]").forEach(
+      (button) => {
+        button.setAttribute(
+          "aria-checked",
+          String(button.dataset.themeChoice === theme),
+        );
+      },
+    );
+  }
+
+  #refreshTableInteractions(): void {
+    const editable = this.#content.getAttribute("contenteditable") === "true";
+    this.#content.querySelectorAll<HTMLTableElement>("table").forEach((table) => {
+      const sortable = table.dataset.scribevaSortable === "true";
+      table.querySelectorAll<HTMLTableCellElement>("th").forEach((header) => {
+        header.draggable = editable && header.colSpan === 1;
+        if (sortable && !editable) header.tabIndex = 0;
+        else header.removeAttribute("tabindex");
+      });
+    });
+  }
+
+  #finishColumnDrag(): void {
+    this.#draggedColumn?.table.classList.remove("is-column-dragging");
+    this.#content
+      .querySelectorAll("th.is-column-drop-target")
+      .forEach((cell) => cell.classList.remove("is-column-drop-target"));
+    this.#draggedColumn = null;
+  }
+
+  #sortTable(header: HTMLTableCellElement): void {
+    const table = header.closest("table");
+    const row = header.parentElement as HTMLTableRowElement | null;
+    const body = table?.tBodies[0];
+    if (!table || !row || !body) return;
+    const column = Array.from(row.cells).indexOf(header);
+    if (column < 0) return;
+    const previous = this.#tableSortState.get(table);
+    const direction =
+      previous?.column === column && previous.direction === "ascending"
+        ? "descending"
+        : "ascending";
+    const multiplier = direction === "ascending" ? 1 : -1;
+    const collator = new Intl.Collator(undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+    const rows = Array.from(body.rows).map((bodyRow, index) => ({
+      index,
+      row: bodyRow,
+      value: bodyRow.cells[column]?.textContent?.trim() ?? "",
+    }));
+    rows
+      .sort(
+        (a, b) =>
+          multiplier * collator.compare(a.value, b.value) || a.index - b.index,
+      )
+      .forEach(({ row: bodyRow }) => body.append(bodyRow));
+    table.querySelectorAll("th[aria-sort]").forEach((cell) => {
+      cell.removeAttribute("aria-sort");
+    });
+    header.setAttribute("aria-sort", direction);
+    this.#tableSortState.set(table, { column, direction });
   }
 
   #updateStatus(): void {
@@ -1124,5 +1647,12 @@ export class EditorShell implements ScribevaEditor {
       );
       button?.classList.toggle("is-active", Boolean(element?.closest(selector)));
     });
+    const table = element?.closest("table");
+    const sortableButton = this.#root.querySelector<HTMLButtonElement>(
+      '[data-command="tableToggleSortable"]',
+    );
+    const sortable = table?.getAttribute("data-scribeva-sortable") === "true";
+    sortableButton?.classList.toggle("is-active", sortable);
+    sortableButton?.setAttribute("aria-pressed", String(sortable));
   }
 }
