@@ -220,7 +220,7 @@ describe("Scribeva public editor API", () => {
     expect(root.style.getPropertyValue("--scribeva-zoom")).toBe("1");
   });
 
-  it("keeps the toolbar available on request and uses icons for table structure actions", () => {
+  it("keeps the toolbar available by default and uses icons for table structure actions", () => {
     const host = document.querySelector<HTMLElement>("#host")!;
     createEditor(host, { initialHTML: "<p>Long document</p>", locale: "en" });
     const root = host.querySelector<HTMLElement>(".scribeva")!;
@@ -248,7 +248,11 @@ describe("Scribeva public editor API", () => {
     secondary.dispatchEvent(new Event("change", { bubbles: true }));
     expect(root.style.getPropertyValue("--scribeva-secondary")).toBe("#2878a8");
     expect(host.querySelector("[data-secondary-value]")?.textContent).toBe("#2878A8");
-    expect(sticky.checked).toBe(false);
+    expect(sticky.checked).toBe(true);
+    expect(root.classList.contains("is-toolbar-sticky")).toBe(true);
+    sticky.checked = false;
+    sticky.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.classList.contains("is-toolbar-sticky")).toBe(false);
     sticky.checked = true;
     sticky.dispatchEvent(new Event("change", { bubbles: true }));
     expect(root.classList.contains("is-toolbar-sticky")).toBe(true);
@@ -259,6 +263,7 @@ describe("Scribeva public editor API", () => {
     const bottomOffset = host.querySelector<HTMLInputElement>(
       '[data-sticky-offset="bottom"]',
     )!;
+    expect(topOffset.value).toBe("72");
     topOffset.value = "24";
     topOffset.dispatchEvent(new Event("change", { bubbles: true }));
     bottomOffset.value = "72";

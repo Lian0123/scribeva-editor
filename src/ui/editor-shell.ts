@@ -239,6 +239,7 @@ export class EditorShell implements ScribevaEditor {
     this.#root.className = `scribeva${options.className ? ` ${options.className}` : ""}`;
     this.#root.dataset.theme = options.theme ?? "light";
     this.#root.innerHTML = this.#shellMarkup();
+    this.#root.classList.add("is-toolbar-sticky");
     this.#host.append(this.#root);
 
     const content = this.#root.querySelector<HTMLElement>("[data-scribeva-content]");
@@ -730,12 +731,12 @@ export class EditorShell implements ScribevaEditor {
       <div class="scribeva__view-section scribeva__view-section--scroll">
         <span class="scribeva__view-section-title">${l.chrome.keepToolbarVisible}</span>
         <label class="scribeva__view-option scribeva__sticky-option">
-          <input type="checkbox" data-sticky-toolbar>
+          <input type="checkbox" data-sticky-toolbar checked>
           <span>${l.chrome.keepToolbarVisible}</span>
         </label>
         <label class="scribeva__view-option">
           <span>${l.chrome.stickyTopOffset}</span>
-          <span class="scribeva__unit-input"><input type="number" min="0" max="240" step="1" value="0" data-sticky-offset="top"><b>px</b></span>
+          <span class="scribeva__unit-input"><input type="number" min="0" max="240" step="1" value="72" data-sticky-offset="top"><b>px</b></span>
         </label>
         <label class="scribeva__view-option">
           <span>${l.chrome.stickyBottomOffset}</span>

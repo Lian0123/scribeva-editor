@@ -345,7 +345,7 @@ test("keeps the toolbar sticky and inserts a printable page break", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("tab", { name: "檢視" }).click();
-  await page.getByLabel("捲動時保持工具列顯示").check();
+  await expect(page.getByLabel("捲動時保持工具列顯示")).toBeChecked();
   await expect(page.locator(".scribeva")).toHaveClass(/is-toolbar-sticky/);
   await expect(page.locator("[data-scribeva-toolbar]")).toHaveCSS(
     "position",

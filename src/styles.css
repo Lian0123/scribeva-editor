@@ -23,7 +23,7 @@
     --scribeva-shadow: 0 18px 45px rgb(27 39 65 / 12%),
       0 2px 8px rgb(27 39 65 / 7%);
     --scribeva-zoom: 1;
-    --scribeva-sticky-top: 0px;
+    --scribeva-sticky-top: 72px;
     --scribeva-sticky-bottom: 0px;
     position: relative;
     display: grid;

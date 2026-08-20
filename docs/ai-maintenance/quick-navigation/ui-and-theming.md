@@ -34,8 +34,9 @@ custom Unicode entry, mathematical symbols, horizontal separators, and
 print-aware page breaks. Table action
 icons show the insertion edge or deletion axis while localized tooltips and
 accessible names preserve the full command wording. View includes a sanitized
-document preview and an opt-in sticky toolbar that remains at the viewport edge
-while a long editor is scrolled. Its top offset accommodates fixed site headers;
+document preview and a sticky toolbar that is enabled by default and remains at
+the viewport edge while a long editor is scrolled. Its top offset defaults to
+72px to accommodate fixed site headers;
 its bottom reserve limits toolbar height above fixed footers, and the editor root
 remains the natural sticky boundary. Page-break markers are visible by default
 and can be hidden without changing stored HTML. Native
