@@ -10,6 +10,7 @@
     --scribeva-surface: #ffffff;
     --scribeva-surface-raised: #ffffff;
     --scribeva-surface-muted: #f7f8fa;
+    --scribeva-page-background: #ffffff;
     --scribeva-border: #d9dee7;
     --scribeva-border-strong: #c5ccd8;
     --scribeva-text: #172033;
@@ -497,6 +498,10 @@
     background: #ffd84d;
   }
 
+  .scribeva__color--background::after {
+    background: #fff0a6;
+  }
+
   .scribeva__color input {
     position: absolute;
     inset: 0;
@@ -890,6 +895,10 @@
   .scribeva__secondary-picker button[data-secondary-preset="#2878a8"] { --accent-preset: #2878a8; }
   .scribeva__secondary-picker button[data-secondary-preset="#9b4d9b"] { --accent-preset: #9b4d9b; }
   .scribeva__secondary-picker button[data-secondary-preset="#b47b23"] { --accent-preset: #b47b23; }
+  .scribeva__page-background-picker button[data-page-background-preset="#ffffff"] { --accent-preset: #ffffff; }
+  .scribeva__page-background-picker button[data-page-background-preset="#f5e9c9"] { --accent-preset: #f5e9c9; }
+  .scribeva__page-background-picker button[data-page-background-preset="#eef5ff"] { --accent-preset: #eef5ff; }
+  .scribeva__page-background-picker button[data-page-background-preset="#f4f0ff"] { --accent-preset: #f4f0ff; }
 
   .scribeva__accent-picker button:hover,
   .scribeva__accent-picker button.is-selected {
@@ -1044,6 +1053,27 @@
 
   .scribeva__template-card[data-template-id="adConcept"] .scribeva__template-card-sheet i {
     background: #fff7e8;
+  }
+
+  .scribeva__template-card[data-template-id="executive"] .scribeva__template-card-sheet {
+    background: #f1f3f7;
+  }
+  .scribeva__template-card[data-template-id="proposal"] .scribeva__template-card-sheet {
+    background: #e9f7f0;
+    border-radius: 2px;
+  }
+  .scribeva__template-card[data-template-id="newsletter"] .scribeva__template-card-sheet {
+    background: #fff8e6;
+  }
+  .scribeva__template-card[data-template-id="newsletter"] .scribeva__template-card-sheet i:first-child {
+    background: #d98b36;
+  }
+  .scribeva__template-card[data-template-id="meeting"] .scribeva__template-card-sheet {
+    background: #f4f0ff;
+    border-style: dashed;
+  }
+  .scribeva__template-card[data-template-id="meeting"] .scribeva__template-card-sheet i:first-child {
+    background: #8b6bd9;
   }
 
   .scribeva__template-card strong {
@@ -1219,7 +1249,7 @@
     zoom: var(--scribeva-zoom);
     border: 1px solid color-mix(in srgb, var(--scribeva-border) 75%, transparent);
     border-radius: 2px;
-    background: var(--scribeva-surface-raised);
+    background: var(--scribeva-page-background);
     color: var(--scribeva-text);
     box-shadow: var(--scribeva-shadow);
     font-family: "Noto Serif TC", "Noto Serif JP", "Noto Serif", serif;

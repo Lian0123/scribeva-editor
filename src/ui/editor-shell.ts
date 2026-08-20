@@ -7,6 +7,7 @@ import type {
 } from "../core/types";
 import { EditorEngine } from "../browser/editor-engine";
 import { getLocale, type ScribevaLocale } from "../locales";
+import { compactHTML, formatHTML } from "../security/formatter";
 import { icon } from "./icons";
 
 type DialogKind =
@@ -550,7 +551,8 @@ export class EditorShell implements ScribevaEditor {
         ${this.#button("strike", l.commands.strike, undefined, "S")}
         ${this.#button("inlineCode", l.commands.inlineCode, undefined, "</>")}
         <label class="scribeva__color" title="Text color">A<input type="color" value="#1d2939" data-command-input="textColor"></label>
-        <label class="scribeva__color scribeva__color--highlight" title="Highlight">A<input type="color" value="#fff0a6" data-command-input="highlight"></label>
+        <label class="scribeva__color scribeva__color--background" title="${l.commands.backgroundColor}">A<input type="color" value="#fff0a6" data-command-input="backgroundColor" aria-label="${l.commands.backgroundColor}"></label>
+        ${this.#button("clearBackgroundColor", l.commands.clearBackgroundColor, undefined, "×")}
       </div>
       <h3>${l.groups.text}</h3>
     </section>`;
@@ -708,6 +710,15 @@ export class EditorShell implements ScribevaEditor {
             <button type="button" data-secondary-preset="#2878a8" aria-label="Ocean"></button>
             <button type="button" data-secondary-preset="#9b4d9b" aria-label="Plum"></button>
             <button type="button" data-secondary-preset="#b47b23" aria-label="Amber"></button>
+          </label>
+          <label class="scribeva__accent-picker scribeva__page-background-picker">
+            <span>${l.chrome.pageBackground}</span>
+            <input type="color" data-page-background value="#ffffff" aria-label="${l.chrome.pageBackgroundValue}">
+            <output data-page-background-value>#FFFFFF</output>
+            <button type="button" data-page-background-preset="#ffffff" aria-label="Paper"></button>
+            <button type="button" data-page-background-preset="#f5e9c9" aria-label="Sand"></button>
+            <button type="button" data-page-background-preset="#eef5ff" aria-label="Sky"></button>
+            <button type="button" data-page-background-preset="#f4f0ff" aria-label="Lilac"></button>
           </label>
           <select data-theme-select aria-label="${l.chrome.theme}" hidden>
             <option value="light">${l.theme.light}</option>
@@ -939,6 +950,12 @@ export class EditorShell implements ScribevaEditor {
         if (secondaryPreset?.dataset.secondaryPreset) {
           this.#setSecondaryColor(secondaryPreset.dataset.secondaryPreset);
         }
+        const pageBackgroundPreset = target.closest<HTMLButtonElement>(
+          "[data-page-background-preset]",
+        );
+        if (pageBackgroundPreset?.dataset.pageBackgroundPreset) {
+          this.#setPageBackground(pageBackgroundPreset.dataset.pageBackgroundPreset);
+        }
         const themeChoice = target.closest<HTMLButtonElement>("[data-theme-choice]");
         if (themeChoice?.dataset.themeChoice) {
           this.#setTheme(themeChoice.dataset.themeChoice);
@@ -990,6 +1007,8 @@ export class EditorShell implements ScribevaEditor {
           this.#setAccentColor((target as HTMLInputElement).value);
         } else if (target.matches("[data-secondary-color]")) {
           this.#setSecondaryColor((target as HTMLInputElement).value);
+        } else if (target.matches("[data-page-background]")) {
+          this.#setPageBackground((target as HTMLInputElement).value);
         } else if (target.matches("[data-sticky-offset]")) {
           const input = target as HTMLInputElement;
           const value = Math.min(
@@ -1634,13 +1653,13 @@ export class EditorShell implements ScribevaEditor {
   }
 
   #resetSource(): void {
-    this.#source.value = this.#engine.getHTML();
+    this.#source.value = formatHTML(this.#engine.getHTML());
     this.#updateSourceMetrics();
   }
 
   #applySource(): void {
-    this.#engine.setHTML(this.#source.value, "command");
-    this.#source.value = this.#engine.getHTML();
+    this.#engine.setHTML(compactHTML(this.#source.value), "command");
+    this.#source.value = formatHTML(this.#engine.getHTML());
     this.#updateSourceMetrics();
     this.#updateStatus();
   }
@@ -1795,6 +1814,7 @@ export class EditorShell implements ScribevaEditor {
     );
     this.#syncAccentControl();
     this.#syncSecondaryControl();
+    this.#syncPageBackgroundControl();
   }
 
   #setAccentColor(value: string): void {
@@ -1862,6 +1882,35 @@ export class EditorShell implements ScribevaEditor {
         button.dataset.secondaryPreset?.toLowerCase() === candidate.toLowerCase(),
       ),
     );
+  }
+
+  #setPageBackground(value: string): void {
+    const normalized = value.trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}$/u.test(normalized)) return;
+    this.#root.style.setProperty("--scribeva-page-background", normalized);
+    this.#syncPageBackgroundControl(normalized);
+  }
+
+  #syncPageBackgroundControl(value?: string): void {
+    const input = this.#root.querySelector<HTMLInputElement>("[data-page-background]");
+    const output = this.#root.querySelector<HTMLOutputElement>(
+      "[data-page-background-value]",
+    );
+    const computed = getComputedStyle(this.#root)
+      .getPropertyValue("--scribeva-page-background")
+      .trim();
+    const candidate = value ?? (computed.startsWith("#") ? computed : "#ffffff");
+    if (input && /^#[0-9a-f]{6}$/u.test(candidate)) input.value = candidate;
+    if (output) output.value = candidate.toUpperCase();
+    this.#root
+      .querySelectorAll<HTMLButtonElement>("[data-page-background-preset]")
+      .forEach((button) =>
+        button.classList.toggle(
+          "is-selected",
+          button.dataset.pageBackgroundPreset?.toLowerCase() ===
+            candidate.toLowerCase(),
+        ),
+      );
   }
 
   #refreshTableInteractions(): void {

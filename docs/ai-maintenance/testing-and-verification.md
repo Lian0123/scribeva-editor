@@ -31,6 +31,8 @@ baseline. Release verification runs Chromium, Firefox, and WebKit.
 
 HTML source specifications cover line numbering, source sanitization,
 Ctrl/Command+S, visual/source tab synchronization, and history restoration.
+They also cover deterministic multi-line formatting, whitespace compaction on
+apply, selection background-color apply/clear, and page-background token updates.
 Table specifications exercise every directional border preset and verify
 computed no-border behavior in a real browser.
 

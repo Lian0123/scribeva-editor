@@ -25,7 +25,9 @@ only when the user selects the localized custom-value option. The paragraph
 group also applies one- through four-column
 layouts to the selected top-level blocks.
 
-The Insert tab includes URL images, Blob-backed local image upload, tables
+The Home tab includes accessible text/background color controls with a clear
+action, while View includes a non-document page-background palette that changes
+the editing canvas without changing exported HTML. The Insert tab includes URL images, Blob-backed local image upload, tables
 with grouped directional row/column and structure icons, reader-sortable
 tables, drag-to-reorder header columns, an expanded emoji picker with
 custom Unicode entry, mathematical symbols, horizontal separators, and
@@ -46,7 +48,9 @@ The Templates tab ships nine dependency-free starter documents: executive
 brief, project proposal, editorial newsletter, meeting notes, brand manifesto,
 launch command center, customer case study, workshop canvas, and campaign
 concept. Cards use distinct visual cues and update an inline preview before
-application. Applying a template replaces the current document through
+application. The HTML source tab pretty-prints block structure with line numbers;
+formatting-only whitespace is removed before apply so source readability never
+creates accidental document content or history entries. Applying a template replaces the current document through
 `EditorEngine` with source `command`, so sanitization, change events, and undo
 remain intact.
 

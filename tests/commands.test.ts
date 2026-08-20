@@ -85,6 +85,19 @@ describe("default editor commands", () => {
     expect(engine.getHTML()).toContain("margin-left: 0px");
   });
 
+  it("applies and clears a safe selection background color", () => {
+    const engine = new EditorEngine(root, "<p>Hello</p>");
+    selectText(root, 0, 5);
+    expect(engine.exec("backgroundColor", "#fff0a6")).toBe(true);
+    expect(engine.getHTML()).toContain(
+      '<span style="background-color: #fff0a6">Hello</span>',
+    );
+
+    selectText(root, 0, 5);
+    expect(engine.exec("clearBackgroundColor")).toBe(true);
+    expect(engine.getHTML()).toBe("<p>Hello</p>");
+  });
+
   it("accepts validated custom font sizes and line heights", () => {
     const engine = new EditorEngine(root, "<p>Hello</p>");
 

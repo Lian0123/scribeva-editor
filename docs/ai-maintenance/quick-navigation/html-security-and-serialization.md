@@ -7,7 +7,10 @@ styles, validates URLs, and serializes attributes deterministically.
 `normalizePastedHTML` removes common Microsoft Office metadata before
 sanitization.
 
-HTML source mode uses the same `EditorEngine.setHTML` path as the public API;
+HTML source mode presents a deterministic multi-line view of the sanitized HTML
+and uses the same `EditorEngine.setHTML` path as the public API. Indentation-only
+source whitespace is compacted before apply (except inside `pre`) so readable
+source formatting does not become document text;
 scripts, event handlers, and unsupported markup are removed when the user
 applies source or leaves the HTML tab. Directional table borders use explicitly
 allowlisted top/right/bottom/left color, style, and width longhands.

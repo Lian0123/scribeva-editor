@@ -89,6 +89,32 @@ function applyInlineStyle(property: string): EditorCommand {
   };
 }
 
+function clearInlineStyle(property: string): EditorCommand {
+  return ({ element, commit }) => {
+    const range = selectionWithin(element);
+    if (!range) return false;
+    const targets = Array.from(element.querySelectorAll<HTMLElement>("span"))
+      .filter((span) => {
+        try {
+          return range.intersectsNode(span) && Boolean(span.style.getPropertyValue(property));
+        } catch {
+          return false;
+        }
+      });
+    const active = closestElement(range.startContainer, "span", element);
+    if (active?.style.getPropertyValue(property) && !targets.includes(active)) {
+      targets.push(active);
+    }
+    if (!targets.length) return false;
+    targets.forEach((target) => {
+      target.style.removeProperty(property);
+      if (!target.getAttribute("style")?.trim()) unwrap(target);
+    });
+    commit("command");
+    return true;
+  };
+}
+
 function normalizeFontSize(rawValue: unknown): string | null {
   const value =
     typeof rawValue === "number"
@@ -802,6 +828,8 @@ export function createDefaultCommands(): Record<string, EditorCommand> {
     fontSize: applyValidatedInlineStyle("font-size", normalizeFontSize),
     textColor: applyInlineStyle("color"),
     highlight: applyInlineStyle("background-color"),
+    backgroundColor: applyInlineStyle("background-color"),
+    clearBackgroundColor: clearInlineStyle("background-color"),
     indent: ({ element, commit }) => {
       const range = selectionWithin(element);
       if (!range) return false;

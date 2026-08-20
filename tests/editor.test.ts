@@ -400,9 +400,50 @@ describe("Scribeva public editor API", () => {
     host.querySelector<HTMLButtonElement>("[data-apply-template]")?.click();
     expect(editor.getHTML()).toContain("Editorial newsletter");
     expect(editor.getHTML()).toContain("scribeva-page-break");
+    host.querySelector<HTMLButtonElement>('[data-tab="html"]')?.click();
+    const source = host.querySelector<HTMLTextAreaElement>("[data-scribeva-source]")!;
+    expect(source.value).toContain("\n");
+    expect(host.querySelector("[data-source-lines]")?.textContent).toContain("2");
+    host.querySelector<HTMLButtonElement>('[data-tab="home"]')?.click();
     expect(editor.exec("undo")).toBe(true);
     expect(editor.getHTML()).toBe("<p>Original</p>");
     expect(host.querySelectorAll("[data-template-id]")).toHaveLength(9);
+  });
+
+  it("designs selection and page backgrounds from accessible color controls", () => {
+    const host = document.querySelector<HTMLElement>("#host")!;
+    const editor = createEditor(host, { initialHTML: "<p>Colorful copy</p>", locale: "en" });
+    const content = host.querySelector<HTMLElement>("[data-scribeva-content]")!;
+    const text = content.querySelector("p")?.firstChild;
+    if (!text) throw new Error("No text to select.");
+    content.focus();
+    const range = document.createRange();
+    range.selectNodeContents(text);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    const background = host.querySelector<HTMLInputElement>(
+      '[data-command-input="backgroundColor"]',
+    )!;
+    background.dispatchEvent(
+      new MouseEvent("mousedown", { bubbles: true, cancelable: true }),
+    );
+    background.value = "#f5e9c9";
+    background.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(editor.getHTML()).toContain("background-color: #f5e9c9");
+
+    host.querySelector<HTMLButtonElement>('[data-command="clearBackgroundColor"]')?.click();
+    expect(editor.getHTML()).not.toContain("background-color");
+
+    host.querySelector<HTMLButtonElement>('[data-tab="view"]')?.click();
+    const pageBackground = host.querySelector<HTMLInputElement>("[data-page-background]")!;
+    pageBackground.value = "#eef5ff";
+    pageBackground.dispatchEvent(new Event("change", { bubbles: true }));
+    const root = host.querySelector<HTMLElement>(".scribeva")!;
+    expect(root.style.getPropertyValue("--scribeva-page-background")).toBe("#eef5ff");
+    expect(host.querySelector("[data-page-background-value]")?.textContent).toBe("#EEF5FF");
   });
 
   it("sorts sortable table rows in preview without rewriting authored HTML", () => {
@@ -551,7 +592,7 @@ describe("Scribeva public editor API", () => {
         cancelable: true,
       }),
     );
-    expect(editor.getHTML()).toBe("<h2>Edited</h2>\n<p>Safe</p>");
+    expect(editor.getHTML()).toBe("<h2>Edited</h2><p>Safe</p>");
 
     host.querySelector<HTMLButtonElement>('[data-command="source:reset"]')?.click();
     expect(source.value).toBe("<h2>Edited</h2>\n<p>Safe</p>");
