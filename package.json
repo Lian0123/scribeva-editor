@@ -1,6 +1,6 @@
 {
   "name": "scribeva-editor",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A dependency-free, enterprise-grade HTML editor with a Word-inspired interface.",
   "keywords": [
     "html-editor",
