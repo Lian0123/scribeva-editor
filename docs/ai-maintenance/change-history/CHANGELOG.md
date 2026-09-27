@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=maintainers; verified=2026-07-31; sources=package.json,src,tests,docs/ai-maintenance -->
+<!-- AI-DOC: owner=maintainers; verified=2026-08-01; sources=package.json,src,tests,docs/ai-maintenance -->
 # Changelog
 
 ## Unreleased
@@ -44,3 +44,24 @@
   table border width with inputs shown only in custom mode; grouped directional
   SVG table row/column actions with accessible labels; and layout-aware document
   zoom with step controls and reset.
+- Opt-in sticky editor toolbar for long pages, print-aware page breaks,
+  icon-only table structure actions, sortable reader tables, and drag-to-reorder
+  table columns with sanitized metadata and undoable authoring commands.
+- Configurable sticky-toolbar top and bottom offsets, default-visible page-break
+  markers, editor-only isolated printing, and a previewable Templates tab with
+  nine localized, undoable starter documents.
+- Separate, opener-isolated print-preview tabs that never alter host-page print
+  state; a three-section View ribbon; and additional creative templates for
+  brand, launch, case-study, workshop, and campaign workflows.
+- A dedicated campaign-concept template with advertising-brief structure
+  (insight, headline, key visual, and CTA), plus theme cards and a document-view
+  hint in the View panel.
+- Mobile-first Ribbon and template layouts with 44px touch targets, stacked
+  View sections, safe-area dialog spacing, controlled custom accent colors, and
+  print styles that inherit the active editor palette.
+- Secondary tone controls with presets and print-token propagation, equal-height
+  Ribbon groups, and reduced-motion-safe native CSS UI animations scoped away
+  from the print document.
+- A dedicated Animation tab between View and Edit HTML with selectable text
+  effects, custom duration/delay/intensity/loop controls, inspectable
+  `scribeva-motion-*` class names, and print-safe motion styling.

@@ -1,4 +1,4 @@
-<!-- AI-DOC: owner=quality; verified=2026-07-31; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
+<!-- AI-DOC: owner=quality; verified=2026-08-01; sources=package.json,vitest.config.ts,playwright.config.ts,tests -->
 # Testing and verification
 
 | Change | Minimum verification | Additional verification |
@@ -31,12 +31,29 @@ baseline. Release verification runs Chromium, Firefox, and WebKit.
 
 HTML source specifications cover line numbering, source sanitization,
 Ctrl/Command+S, visual/source tab synchronization, and history restoration.
+They also cover deterministic multi-line formatting, whitespace compaction on
+apply, selection background-color apply/clear, and page-background token updates.
 Table specifications exercise every directional border preset and verify
 computed no-border behavior in a real browser.
 
+View and template specifications assert the three-section settings layout,
+nine localized template cards, preview selection, sanitized undoable
+application, and default page-break visibility. Print tests verify that a
+separate tab is opened, `window.opener` is severed, sanitized document content
+and localized controls are created there, Print/Close work, and the host page
+never receives print-only classes or portal markup.
+
+Responsive specifications run at a 390px viewport and assert no document-level
+horizontal overflow, touch-sized theme controls, stacked View sections, aligned
+Ribbon groups, native CSS tab motion, and a mobile-safe template action area.
+Theme tests cover visible mode cards, custom accent/secondary synchronization,
+print-style token propagation, and the dedicated Animation tab applying and
+clearing classname-based motion while preserving document text across HTML mode.
+
 Website checks also open the absolute `file://.../demo/index.html` path, assert
 zero console/page errors, and switch English/Japanese example documents.
-Metadata tests cover description, Open Graph image, canonical URL, and
-SoftwareApplication JSON-LD. Table Ribbon tests verify computed border and fill
+Metadata tests cover description, Googlebot directives, Open Graph image,
+canonical URL, `llms.txt`, localized JSON-LD graph entities, and language updates.
+Table Ribbon tests verify computed border and fill
 styles, fractional custom-width serialization, and clear localized action
 names on icon-only controls.

@@ -1,7 +1,7 @@
-<!-- AI-DOC: owner=design-system; verified=2026-07-31; sources=src/ui,src/locales,src/styles.css,demo -->
+<!-- AI-DOC: owner=design-system; verified=2026-08-01; sources=src/ui,src/locales,src/styles.css,demo -->
 # UI and theming
 
-`EditorShell` creates the title bar, tabs, Home/Insert/View ribbons, document
+`EditorShell` creates the title bar, tabs, Home/Insert/Templates/View ribbons, document
 canvas, status bar, and native dialog. It delegates document behavior to
 `EditorEngine`. Toolbar mousedown captures the current Range so dialogs and
 controls can restore it before a command.
@@ -25,16 +25,59 @@ only when the user selects the localized custom-value option. The paragraph
 group also applies one- through four-column
 layouts to the selected top-level blocks.
 
-The Insert tab includes URL images, Blob-backed local image upload, tables
-with grouped directional row/column icons, an expanded emoji picker with
-custom Unicode entry, mathematical symbols, and separators. Table action
+The Home tab includes accessible text/background color controls with a clear
+action, while View includes a non-document page-background palette that changes
+the editing canvas without changing exported HTML. The Insert tab includes URL images, Blob-backed local image upload, tables
+with grouped directional row/column and structure icons, reader-sortable
+tables, drag-to-reorder header columns, an expanded emoji picker with
+custom Unicode entry, mathematical symbols, horizontal separators, and
+print-aware page breaks. Table action
 icons show the insertion edge or deletion axis while localized tooltips and
 accessible names preserve the full command wording. View includes a sanitized
-document preview. Native
+document preview and a sticky toolbar that is enabled by default and remains at
+the viewport edge while a long editor is scrolled. Its top offset defaults to
+72px to accommodate fixed site headers;
+its bottom reserve limits toolbar height above fixed footers, and the editor root
+remains the natural sticky boundary. Page-break markers are visible by default
+and can be hidden without changing stored HTML. Native
 dialog cancellation uses a non-submit button and the dialog `cancel` event;
 only an affirmative form submit performs required-field validation. Font
 controls and CSS reference Noto Sans, Noto Serif, Noto Sans Mono, generic
 fallbacks, and platform emoji only. Font files are external consumer assets.
+
+The Templates tab ships nine dependency-free starter documents: executive
+brief, project proposal, editorial newsletter, meeting notes, brand manifesto,
+launch command center, customer case study, workshop canvas, and campaign
+concept. Cards use distinct visual cues and update an inline preview before
+application. The HTML source tab pretty-prints block structure with line numbers;
+formatting-only whitespace is removed before apply so source readability never
+creates accidental document content or history entries. Applying a template replaces the current document through
+`EditorEngine` with source `command`, so sanitization, change events, and undo
+remain intact.
+
+View controls are grouped into document, scrolling, and output sections rather
+than one flat tool row. Printing synchronously opens a separate `about:blank`
+tab from the user gesture, severs `window.opener`, and constructs a localized
+print-ready document using DOM APIs. The source editor page is never mutated or
+restyled. The print tab contains only sanitized editor HTML, dedicated screen
+and print CSS, explicit Print and Close controls, and real page-break behavior.
+
+The Animation tab sits between View and Edit HTML. It applies native CSS effects
+to the selected text block in the live editor with duration, delay, intensity,
+and looping controls. Settings are encoded as `scribeva-motion-*` class names so
+the HTML editor can inspect and edit them; the print tab intentionally has no
+motion CSS, so these classes never animate or alter printed layout.
+
+The View document section exposes accessible theme cards plus a controlled
+accent-color and secondary-color pickers with presets. Both tones are applied
+through shared `--scribeva-` tokens used by editor surfaces, controls, focus
+states, and the print tab, so a custom theme cannot silently change at print
+time. Ribbon groups stretch to a common height on wide layouts, while native
+CSS hover/tab motion is disabled by reduced-motion preferences and is scoped to
+the editor UI (never the print document). Mobile layouts use 44px touch targets, horizontally scrollable tabs and
+ribbons where needed, stacked View sections, two-column template cards, a
+single-column template preview/action flow, safe-area-aware dialogs, and a
+fluid document canvas at phone widths.
 
 The official site uses a forest-green editorial system, warm-paper surfaces,
 and layered GSAP/ScrollTrigger motion: staged hero construction, document
@@ -42,8 +85,9 @@ parallax, reading progress, section choreography, and editor/detail reveals,
 all with a reduced-motion escape. Its
 classic IIFE bundle is copied to `demo/assets`, allowing `demo/index.html` to
 run directly from `file://`. The same source produces `demo-dist` for Pages.
-SEO includes localized metadata, Open Graph/Twitter tags, SoftwareApplication
-JSON-LD, canonical/alternate links, robots, sitemap, manifest, and a branded
+SEO includes localized metadata, Open Graph/Twitter tags, WebSite/WebPage/
+SoftwareApplication/Organization JSON-LD, canonical/alternate links, robots,
+sitemap, manifest, and an AI-readable `llms.txt` product summary, plus a branded
 social card.
 
 Document zoom uses layout-aware CSS zoom from 70% to 140%, with slider,

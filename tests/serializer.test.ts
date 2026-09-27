@@ -31,4 +31,10 @@ describe("HTML and JSON conversion", () => {
     ]);
     expect(jsonToHTML(json)).toBe(input);
   });
+
+  it("round-trips page breaks and sortable table metadata", () => {
+    const input =
+      '<hr class="scribeva-page-break"><table data-scribeva-sortable="true"><thead><tr><th scope="col">Name</th></tr></thead><tbody><tr><td>A</td></tr></tbody></table>';
+    expect(jsonToHTML(htmlToJSON(input))).toBe(input);
+  });
 });

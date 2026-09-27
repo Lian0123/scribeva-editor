@@ -1,14 +1,16 @@
 import type { en } from "./en";
 
-type LocaleShape = {
-  [K in keyof typeof en]: (typeof en)[K] extends Record<string, string>
-    ? { [P in keyof (typeof en)[K]]: string }
-    : string;
-};
+type Localized<T> = T extends string
+  ? string
+  : T extends Record<string, unknown>
+    ? { [K in keyof T]: Localized<T[K]> }
+    : T;
+
+type LocaleShape = Localized<typeof en>;
 
 export const zhTW: LocaleShape = {
   appName: "Scribeva",
-  tabs: { home: "常用", insert: "插入", view: "檢視", html: "HTML 編輯" },
+  tabs: { home: "常用", insert: "插入", templates: "模板式樣", view: "檢視", animation: "動畫", html: "HTML 編輯" },
   groups: {
     history: "歷程",
     text: "文字",
@@ -17,6 +19,8 @@ export const zhTW: LocaleShape = {
     appearance: "外觀",
     document: "文件",
     table: "表格",
+    templates: "模板圖庫",
+    animation: "文字動畫",
   },
   commands: {
     undo: "復原",
@@ -26,6 +30,8 @@ export const zhTW: LocaleShape = {
     underline: "底線",
     strike: "刪除線",
     inlineCode: "行內程式碼",
+    backgroundColor: "背景色彩",
+    clearBackgroundColor: "清除背景色彩",
     bulletList: "項目符號",
     orderedList: "編號清單",
     alignLeft: "靠左對齊",
@@ -47,8 +53,11 @@ export const zhTW: LocaleShape = {
     fourColumns: "四欄",
     preview: "預覽",
     horizontalRule: "分隔線",
+    pageBreak: "換頁符號",
     print: "列印",
     focusMode: "專注模式",
+    applyTemplate: "套用模板",
+    closePrint: "關閉",
     tableAddRowBefore: "在上方新增列",
     tableAddRowAfter: "在下方新增列",
     tableDeleteRow: "刪除列",
@@ -59,6 +68,8 @@ export const zhTW: LocaleShape = {
     tableMergeRight: "與右側儲存格合併",
     tableSplitCell: "拆分儲存格",
     tableDelete: "刪除表格",
+    tableSortable: "允許閱讀者排序",
+    tableDragColumns: "拖曳標題儲存格可調整欄位順序",
     tableBorderColor: "框線色彩",
     tableFillColor: "儲存格填色",
     tableBorderWidth: "框線寬度",
@@ -124,6 +135,49 @@ export const zhTW: LocaleShape = {
     fontFamily: "字型",
     fontSize: "字級",
     lineHeight: "行距",
+    keepToolbarVisible: "捲動時保持工具列顯示",
+    stickyTopOffset: "頂端偏移",
+    stickyBottomOffset: "底部保留",
+    showPageBreaks: "顯示換頁符號",
+    printDocumentOnly: "列印時只會輸出編輯器文件。",
+    printPreviewTitle: "列印專用文件",
+    printReadyHint: "請先檢查獨立文件，再從此分頁執行列印。",
+    documentViewHint: "選擇編輯文件時的觀看方式。",
+    themeHint: "表面與對比",
+    accentColor: "強調色",
+    accentValue: "目前強調色",
+    secondaryColor: "輔色調",
+    secondaryValue: "目前輔色調",
+    pageBackground: "頁面背景",
+    pageBackgroundValue: "目前頁面背景",
+    animationHint: "先選取文字或區塊，再選擇動畫效果。",
+    animationEffect: "效果",
+    animationDuration: "持續時間",
+    animationDelay: "延遲",
+    animationApply: "套用動畫",
+    animationClear: "清除動畫",
+    animationNone: "無",
+    animationFadeUp: "淡入上移",
+    animationRise: "上升",
+    animationType: "逐字顯示",
+    animationLoop: "循環播放",
+    animationIntensity: "強度",
+    animationObjects: "目前設定動畫物件",
+    animationEmpty: "尚未設定動畫物件",
+    animationRemove: "移除",
+    animationFadeDown: "淡入下移",
+    animationFadeLeft: "淡入左移",
+    animationFadeRight: "淡入右移",
+    animationZoomIn: "放大進場",
+    animationZoomOut: "縮小進場",
+    animationBlurIn: "模糊淡入",
+    animationBounce: "彈跳",
+    animationShake: "抖動",
+    animationFloat: "漂浮",
+    animationUnderline: "底線展開",
+    animationHighlight: "螢光標示",
+    templatePreview: "模板預覽",
+    templateReplaceHint: "套用後會取代目前文件，且可使用復原還原。",
     presets: "預設值",
     customValue: "自訂數值",
     zoomOut: "縮小",
@@ -135,6 +189,18 @@ export const zhTW: LocaleShape = {
     line: "行",
     column: "欄",
     lines: "行",
+  },
+  templates: {
+    labels: { keySignals: "關鍵訊號", nextActions: "下一步行動", goals: "目標", deliveryPlan: "執行計畫", leadStory: "本期焦點", inBrief: "精選摘要", agenda: "議程", actions: "行動項目", status: "狀態", owner: "負責人", date: "日期", participants: "參與者", purpose: "會議目的", insight: "洞察", headline: "主標", keyVisual: "主視覺", scene: "場景", mood: "氛圍", voice: "語氣", cta: "行動呼籲" },
+    executive: { title: "決策摘要", description: "適合主管快速閱讀的重點、訊號與下一步。" },
+    proposal: { title: "專案提案", description: "清楚呈現機會、執行計畫、里程碑與負責人。" },
+    newsletter: { title: "編輯式電子報", description: "具有主打內容、精選消息與行動引導的版型。" },
+    meeting: { title: "會議紀錄", description: "整理議程、決議、負責人與後續行動。" },
+    manifesto: { title: "品牌宣言", description: "以大膽的編輯風格呈現信念、原則與品牌立場。" },
+    launch: { title: "產品發佈作戰室", description: "統整發佈敘事、時程、負責人與成功訊號。" },
+    caseStudy: { title: "客戶成功故事", description: "將挑戰、解法與可量化成果整理成有說服力的故事。" },
+    workshop: { title: "共創工作坊畫布", description: "從暖身提問、發想、投票一路引導到決策。" },
+    adConcept: { title: "廣告創意提案", description: "從消費者洞察、主標到行動呼籲，完成一個可提案的廣告概念。" },
   },
   placeholder: "開始撰寫內容…",
 };

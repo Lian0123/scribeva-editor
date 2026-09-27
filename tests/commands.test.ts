@@ -85,6 +85,19 @@ describe("default editor commands", () => {
     expect(engine.getHTML()).toContain("margin-left: 0px");
   });
 
+  it("applies and clears a safe selection background color", () => {
+    const engine = new EditorEngine(root, "<p>Hello</p>");
+    selectText(root, 0, 5);
+    expect(engine.exec("backgroundColor", "#fff0a6")).toBe(true);
+    expect(engine.getHTML()).toContain(
+      '<span style="background-color: #fff0a6">Hello</span>',
+    );
+
+    selectText(root, 0, 5);
+    expect(engine.exec("clearBackgroundColor")).toBe(true);
+    expect(engine.getHTML()).toBe("<p>Hello</p>");
+  });
+
   it("accepts validated custom font sizes and line heights", () => {
     const engine = new EditorEngine(root, "<p>Hello</p>");
 
@@ -157,7 +170,7 @@ describe("default editor commands", () => {
     expect(engine.getHTML()).toContain("<ol>");
   });
 
-  it("inserts links, images, text, dividers, and tables", () => {
+  it("inserts links, images, text, dividers, page breaks, and tables", () => {
     const engine = new EditorEngine(root, "<p>Hello</p>");
     selectText(root, 0, 5);
     engine.exec("link", {
@@ -183,6 +196,11 @@ describe("default editor commands", () => {
     selectText(root, 4, 4);
     engine.exec("horizontalRule");
     expect(engine.getHTML()).toContain("<hr>");
+
+    engine.setHTML("<p>Here</p>");
+    selectText(root, 4, 4);
+    engine.exec("pageBreak");
+    expect(engine.getHTML()).toContain('<hr class="scribeva-page-break">');
 
     engine.setHTML("<p>Here</p>");
     selectText(root, 4, 4);
@@ -243,6 +261,29 @@ describe("default editor commands", () => {
     selectCell(root);
     engine.exec("tableDelete");
     expect(root.querySelector("table")).toBeNull();
+  });
+
+  it("moves columns and persists sortable table behavior", () => {
+    const engine = new EditorEngine(
+      root,
+      "<table><thead><tr><th>A</th><th>B</th><th>C</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>3</td></tr></tbody></table>",
+    );
+
+    selectCell(root, 0, 0);
+    expect(engine.exec("tableToggleSortable")).toBe(true);
+    expect(engine.getHTML()).toContain('data-scribeva-sortable="true"');
+
+    selectCell(root, 0, 0);
+    expect(engine.exec("tableMoveColumn", { from: 0, to: 2 })).toBe(true);
+    expect(
+      Array.from(root.querySelectorAll("thead th")).map((cell) => cell.textContent),
+    ).toEqual(["B", "C", "A"]);
+    expect(
+      Array.from(root.querySelectorAll("tbody td")).map((cell) => cell.textContent),
+    ).toEqual(["2", "3", "1"]);
+
+    selectCell(root, 0, 0);
+    expect(engine.exec("tableMoveColumn", { from: 0, to: 99 })).toBe(false);
   });
 
   it("styles table outlines, grid lines, and cell fills", () => {

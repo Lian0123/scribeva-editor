@@ -32,6 +32,16 @@ describe("sanitizeHTML", () => {
     );
   });
 
+  it("preserves only the supported sortable-table flag", () => {
+    expect(
+      sanitizeHTML(
+        '<table data-scribeva-sortable="true"><tr><th>A</th></tr></table><table data-scribeva-sortable="false"><tr><td>B</td></tr></table>',
+      ),
+    ).toBe(
+      '<table data-scribeva-sortable="true"><tbody><tr><th>A</th></tr></tbody></table><table><tbody><tr><td>B</td></tr></tbody></table>',
+    );
+  });
+
   it("preserves safe multi-column document layout", () => {
     expect(
       sanitizeHTML(

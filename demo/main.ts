@@ -299,6 +299,25 @@ function setMeta(selector: string, value: string): void {
   document.querySelector<HTMLMetaElement>(selector)?.setAttribute("content", value);
 }
 
+function updateStructuredData(locale: SiteLocale): void {
+  const script = document.querySelector<HTMLScriptElement>("#structured-data");
+  if (!script) return;
+  try {
+    const parsed = JSON.parse(script.textContent ?? "{}") as { "@graph"?: Array<Record<string, unknown>> };
+    const graph = parsed["@graph"] ?? [];
+    const page = graph.find((item) => item["@type"] === "WebPage");
+    const software = graph.find((item) => item["@type"] === "SoftwareApplication");
+    if (page) {
+      page.name = seo[locale].title;
+      page.inLanguage = locale === "zh-TW" ? "zh-Hant" : locale;
+    }
+    if (software) software.description = seo[locale].description;
+    script.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
+  } catch {
+    // Keep the crawlable static JSON-LD if a browser has modified the script.
+  }
+}
+
 function applyLocale(locale: SiteLocale): void {
   siteLocale = locale;
   document.documentElement.lang =
@@ -311,6 +330,7 @@ function applyLocale(locale: SiteLocale): void {
   setMeta('meta[property="og:locale"]', seo[locale].locale);
   setMeta('meta[name="twitter:title"]', seo[locale].title);
   setMeta('meta[name="twitter:description"]', seo[locale].social);
+  updateStructuredData(locale);
 
   document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((element) => {
     const key = element.dataset.i18n as keyof (typeof copy)["en"];
